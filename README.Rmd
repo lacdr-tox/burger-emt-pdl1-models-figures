@@ -23,7 +23,7 @@ Models and code to generate figures for “Bidirectional Crosstalk Between Epith
 
 ### Models
 
-COPASI models can be found in `data/models`.
+COPASI models can be found in `data/copasi_models`.
 
 ### Figures
 

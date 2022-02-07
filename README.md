@@ -15,7 +15,7 @@ Promotes Tumor Progression.” bioRxiv.
 
 ### Models
 
-COPASI models can be found in `data/models`.
+COPASI models can be found in `data/copasi_models`.
 
 ### Figures
 
