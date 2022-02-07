@@ -1,0 +1,40 @@
+---
+output: github_document
+bibliography: bibliography.bib
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# burger-emt-pdl1-models-figures
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+Models and code to generate figures for “Bidirectional Crosstalk Between Epithelial-Mesenchymal Plasticity and IFNγ-Induced PD-L1 Expression Promotes Tumor Progression.” bioRxiv. https://doi.org/10.1101/2022.02.03.478950 [@Burger2022_biorxiv].
+
+## Usage
+
+### Models
+
+COPASI models can be found in `data/models`.
+
+### Figures
+
+Figures are generated reproducibly in R using [`renv`](https://rstudio.github.io/renv/index.html) and [`targets`](https://docs.ropensci.org/targets/):
+
+1. Run 
+    ```{r, eval=F}
+renv::restore()
+```
+    to install R package dependencies.
+
+2. Open `targets.Rmd` in RStudio and choose *Run* > *Run All*. Figures will appear in the `output` folder.
+
+---

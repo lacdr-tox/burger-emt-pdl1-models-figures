@@ -1,0 +1,1010 @@
+---
+title: "Figures for Bidirectional crosstalk between epithelial-mesenchymal plasticity and IFNγ-induced PD-L1 expression promotes tumor progression"
+author: "Gerhard Burger & Carlijn Lems"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(tar_interactive = F)
+options(scipen=999)
+```
+
+# Packages
+
+```{r, eval = FALSE}
+install.packages("remotes")
+remotes::install_github("ropensci/targets")
+remotes::install_github("clauswilke/colorblindr")
+remotes::install_cran(c("drc", "jpeg", "colorspace", "grid", "cowplot", "magick", "future", "future.callr", "targets", "tarchetypes", "scales", "parallel", "glue", "colorblindr", "patchwork", "fs", "magick", "rootSolve" 'tidyverse'))
+                      
+source("R/functions.R")
+source("R/common_plotstuff.R")
+```
+
+# Setup
+
+First, load `targets` to activate the specialized `knitr` engine for Target Markdown.
+
+```{r}
+library(targets)
+
+# my custom target utils
+tar_mload <- function(names) {
+  tar_make({{names}}) 
+  tar_load({{names}}, envir = parent.frame(n = 2))
+}
+tar_mread <- function(name) {
+  tar_mload({{name}})
+  name
+}
+```
+
+```{r}
+tar_unscript()
+```
+
+# Globals
+
+We first define some global options/functions common to all targets. The function below plots a histogram of ozone concentrations, and our histogram target will need it.
+
+```{targets 00globals, tar_globals = TRUE}
+options(tidyverse.quiet = TRUE)
+options(scipen=999)
+source("R/functions.R")
+source("R/common_plotstuff.R")
+tar_option_set(packages = c("drc", "future", "future.callr", "cowplot", "magick", "jpeg", "grid",  "colorspace", "tarchetypes", "scales", "parallel", "glue", "magrittr", "colorblindr", "patchwork", "fs", "magick", "rootSolve", "tidyverse"))
+library(tarchetypes)
+library(future)
+library(future.callr)
+plan(callr)
+tar_config_set(workers = 12)
+
+text_size <- 15
+label_size <- round(text_size *1.5)
+```
+
+# Targets
+
+## Figures
+
+### 1. Model construction
+
+```{targets figure1_pre}
+list(
+  # biorender svg is imported pdf in inkscape with poppler
+  tar_target(jakstat_file, "data/biorender/biorender_jakstatpdl.svg", format = "file"),
+  tar_target(model_file, "data/inkscape/TCSandPDL1.svg", format = "file"),
+  tar_target(jakstat_bior, ggdraw() + draw_image(image_read(jakstat_file, density = 300))),
+  tar_target(model_plot, ggdraw() + draw_image(image_read(model_file, density = 300)))
+)
+```
+
+#### Time course data
+
+```{targets figure1_timecourse}
+list(
+  tar_target(ifnstat_file, 'data/time_courses_sub/jakstat_time_course_ifn1.txt', format = "file"),
+  tar_target(ifnpdl_file, 'data/time_courses_sub/ifn_jak_stat_pdl_timecourse_ifn1.txt', format = "file"),
+  tar_target(ifnstat_timecourse, read_copasi(ifnstat_file)),
+  tar_target(ifnpdl_timecourse, read_copasi(ifnpdl_file)),
+  tar_target(stcs_timecourse, read_copasi(emt_no_int_file)),
+  tar_target(ifnstat_tc_plot, 
+             ggplot(ifnstat_timecourse) + 
+               geom_line(aes(x = `# Time` / 60, y = `[x10]`), size = 1.1) +
+               labs(x = "Time (minutes)", y = "STAT1p_2\n(nM)") + 
+               theme_cowplot()),
+  tar_target(ifnpdl_tc_plot, 
+             ggplot(ifnpdl_timecourse) + 
+               geom_line(aes(x = `# Time`, y = `[PM]`), size = 1.1) +
+               scale_x_continuous(breaks = seq(0,48, by = 12), limits = c(0,48)) +
+               labs(x = "Time (hours)", y = "PD-L1 membr.\n(molecules)") + 
+               theme_cowplot()),
+  tar_target(stcs_tc_plot, 
+             ggplot(stcs_timecourse) + 
+               geom_line(aes(x = `# Time` / 24, y = `[mZ]`), size = 1.1) +
+               labs(x = "Time (days)", y = "ZEB1 mRNA\n(molecules)") + 
+               theme_cowplot()),
+  tar_target(tc_aligned, cowplot::align_plots(ifnstat_tc_plot, ifnpdl_tc_plot, stcs_tc_plot, align = "v", axis = 'l')),
+  tar_target(tc_combined, plot_grid(tc_aligned[[1]], tc_aligned[[2]], tc_aligned[[3]], nrow = 1))
+)
+```
+
+#### TCS model
+
+```{targets tcs_bif}
+list(
+  tar_target(labels_p1, tribble(
+    ~text, ~x, ~y,
+    "E", 187000, 90,
+    "E/M", 205000, 410,
+    "M", 205000, 920
+  )),
+  tar_target(stcs_data_wbp, 
+             core %>%
+               nest(data = everything()) %>%
+               rowwise() %>%
+               mutate(
+                 bp = list(determine_BP(data, "# Values[S].InitialValue", "[mZ]")),
+                 data = list(data %>% mutate(interval = findInterval(`[mZ]`, bp)))
+               ) %>%
+               unnest(cols = data) %>%
+               mutate(stable = (interval %% 2) == 0)),
+  tar_target(stcs_plot, 
+             stcs_data_wbp %>%
+               ggplot(aes(`# Values[S].InitialValue`/1e5, `[mZ]`, group = interval, 
+                          linetype = stable)) + 
+               geom_line(size = 1.2) +
+               scale_linetype_discrete(guide = "none", limits = c(T,F)) +
+               labs(x = bquote('SNAIL1 ('*10^5~'molecules)'), y = 'ZEB1 mRNA (molecules)') +
+               geom_text(data = labels_p1, aes(x,y, label = text), 
+                         fontface = "bold", inherit.aes = F, show.legend = FALSE) + 
+               coord_cartesian(xlim = c(1.8, 2.3), ylim = c(0, 1000)) +
+               scale_x_continuous(expand = c(0,0)) +
+               scale_y_continuous(expand = expansion(mult = c(0,0.05))) +
+               expand_limits(y = 0) +
+               theme_cowplot() + 
+               theme(legend.position = "top"))
+)
+```
+
+```{targets tcs_tc}
+tcs_tc_path <- "data/time_courses_tcs"
+list(
+  tar_target(E_tc_file,  path(tcs_tc_path, "core_emt_E200000_to_S215000.txt"), format = "file"),
+  tar_target(EM_tc_file, path(tcs_tc_path, "core_emt_EM200000_to_S215000.txt"), format = "file"),
+  tar_target(M_tc_file,  path(tcs_tc_path, "core_emt_M200000_to_S215000.txt"), format = "file"),
+  tar_target(E_ss_file,  path(tcs_tc_path, "core_emt_E200000_to_S215000_SS.txt"), format = "file"),
+  tar_target(EM_ss_file, path(tcs_tc_path, "core_emt_EM200000_to_S215000_SS.txt"), format = "file"),
+  tar_target(M_ss_file,  path(tcs_tc_path, "core_emt_M200000_to_S215000_SS.txt"), format = "file"),
+  
+  tar_target(tc_data, tibble(emt = c("E", "E/M", "M"), 
+                             file = c(E_tc_file, EM_tc_file, M_tc_file)) %>%
+               mutate(emt = factor(emt, levels = c("M", "E/M", "E"))) %>%
+               group_by(emt) %>%
+               rowwise() %>%
+               summarise(data = list(read_copasi(file)), .groups = "drop") %>% 
+               unnest(data)),
+  tar_target(ss_data, tibble(emt = c("E", "E/M", "M"), 
+                             file = c(E_ss_file, EM_ss_file, M_ss_file)) %>%
+               mutate(emt = factor(emt, levels = c("M", "E/M", "E"))) %>%
+               group_by(emt) %>%
+               rowwise() %>%
+               summarise(data = list(read_copasi(file) %>% 
+                                       arrange(`# Values[S].InitialValue`)), 
+                         .groups = "drop") %>% 
+               unnest(data)),
+  tar_target(ss_data_min, ss_data %>% group_by(emt) %>%
+               filter(`# Values[S].InitialValue` == min(`# Values[S].InitialValue`))),
+  tar_target(ss_data_max, ss_data %>% group_by(emt) %>%
+               filter(`# Values[S].InitialValue` == max(`# Values[S].InitialValue`))),
+  tar_target(tc_plot, 
+             ggplot(tc_data, aes(`# Time` / 24, `[mZ]`, color = emt)) + 
+               geom_line(size = 1.2, show.legend = F) +
+               labs(x = "Time (days)", y = "ZEB mRNA (molecules)") +
+               coord_cartesian(ylim = c(0, 1000)) +
+               scale_x_continuous(expand = c(0,0)) +
+               scale_y_continuous(expand = expansion(mult = c(0,0.05))) +
+               expand_limits(y = 0) +
+               theme_cowplot()),
+  tar_target(tc_ss_plot, 
+             stcs_plot +   
+               geom_point(data = ss_data_min, aes(`# Values[S].InitialValue`, `[mZ]`, color = emt),
+                          size = 3, inherit.aes = F, show.legend = F) +
+               geom_line(data = ss_data, aes(`# Values[S].InitialValue`, `[mZ]`, color = emt), 
+                         size = 1.2, inherit.aes = F, show.legend = F, 
+                         arrow = arrow(length = unit(0.1, "inches"), type = "closed"))),
+  tar_target(tc_tot_aligned, cowplot::align_plots(stcs_plot, tc_ss_plot, 
+                                                  align = "v", axis = 'l'))
+)
+```
+```{targets tc_ss_alt_plot, tar_simple = T}
+ss_data_minmax <- left_join(
+  ss_data_max %>% mutate(S = 215000, mZ_high = `[mZ]`) %>% select(emt, starts_with("mZ")),
+  ss_data_min %>% mutate(S = 200000, mZ_low = `[mZ]`) %>% select(emt, starts_with("mZ")),
+  by = "emt"
+) %>% 
+  mutate(emt = factor(emt, levels = c("M", "E/M", "E")))
+
+stcs_plot +   
+  geom_point(data = ss_data_min, aes(2, `[mZ]`, color = emt),
+             size = 2.5, inherit.aes = F, show.legend = F) + 
+  geom_point(data = ss_data_min, aes(2.15, `[mZ]`, color = emt),
+             size = 2.5, inherit.aes = F, show.legend = F) +
+  geom_segment(data = ss_data_min, aes(x = 2, y = `[mZ]`, color = emt,
+                                       xend = 2.15, yend = `[mZ]`),
+             size = 1.2, inherit.aes = F, show.legend = F, linetype = "dashed") +
+  geom_segment(data = ss_data_minmax, aes(x = 2.15, y = mZ_low, color = emt,
+                                       xend = 2.15, yend = mZ_high),
+             size = 1.2, arrow = arrow(length = unit(0.1, "inches"), type = "closed"), 
+             inherit.aes = F, show.legend = F)
+```
+
+
+#### Combined
+
+```{targets figure1}
+list(
+  tar_target(figure1, {
+    plot_grid(
+      plot_grid(jakstat_bior, model_plot,
+                nrow = 1, rel_widths = c(1.1,2),
+                labels = c("A", "B"), label_size = label_size),
+      NULL, NULL,
+      tc_combined,
+      plot_grid(NULL,
+                tc_ss_alt_plot,
+                NULL,
+                tc_plot,
+                NULL,
+                nrow = 1, align = "h", rel_widths = c(0.05, 1,0.05,1,1),
+                labels = c("D","", "", "", ""), label_size = label_size),
+      ncol = 1, rel_heights = c(2.5, 0.05, 0.1, 1,1.7),
+      labels = c("", "", "C", ""), label_size = label_size
+    )
+  }),
+  tar_target(figure1_file, {
+    path <- "output/figure1.pdf"
+    ggsave(path, plot = figure1, width = 12, height = 9, device = cairo_pdf)
+  })
+)
+
+```
+
+### 2. IFNy -> EMT, EMT -> PD-L1
+
+```{targets figure2-source-files}
+bifs_path <- "data/bifs"
+list(
+  tar_target(twod_copasi_file, path(bifs_path, "full_model_2d_bif.txt.xz"), format = "file"),
+  tar_target(core_emt_file, path(bifs_path, "core_emt.txt"), format = "file"),
+  tar_target(ifn_bif_file, path(bifs_path, "full_model_ifn_bif.txt.xz"), format = "file"),
+  tar_target(twod_copasi, read_copasi(twod_copasi_file)),
+  tar_target(core, read_copasi(core_emt_file)),
+  tar_target(g_I_cont, read_copasi(ifn_bif_file))
+)
+```
+#### Snail bifurcation
+
+```{targets bif_globals}
+list(
+  tar_target(xmin, 170000 / 1e5),
+  tar_target(xmax, (230000+1) / 1e5),
+  tar_target(exp_order, c("no_int", "ifn0", "ifn1")),
+  tar_target(exp_labels,  c("TCS", 
+                expression(paste('IFN', gamma, ' = 0 nM')),
+                expression(paste('IFN', gamma, ' = 0.1 nM'))
+                ) %>% setNames(exp_order)) 
+)
+```
+
+```{targets bifs_snail_data, tar_simple = T}
+data <- tribble(
+  ~experiment, ~data,
+  "no_int", core,
+  "ifn0", twod_copasi %>% filter(`Values[I (global)].InitialValue` == 0),
+  "ifn1", twod_copasi %>% filter(`Values[I (global)].InitialValue` == 0.1),
+) %>% 
+  rowwise() %>%
+  mutate(
+    bp = list(determine_BP(data, "# Values[S].InitialValue", "[mZ]")),
+    data = list(data %>% mutate(interval = findInterval(`[mZ]`, bp)))
+  ) %>%
+  unnest(cols = data) %>%
+  mutate(stable = (interval %% 2) == 0)
+
+data %>% mutate(experiment = factor(experiment, levels = exp_order))
+```
+
+
+```{targets bif_snail_zeb, tar_simple = T}
+labels_p1 <- tribble(
+  ~text, ~x, ~y,
+  "E", 177000, 90,
+  "E/M", 197000, 410,
+  "M", 205000, 920
+) %>% mutate(x = x / 1e5)
+
+bifs_snail_data %>%
+  ggplot(aes(`# Values[S].InitialValue` / 1e5, `[mZ]`, group = interaction(experiment, interval), linetype = stable, color = experiment)) + 
+  geom_line(size = 1.2) + 
+  geom_vline(xintercept = 190000 / 1e5, linetype = "dashed") +
+  scale_linetype_discrete(guide = "none", limits = c(T,F)) +
+  scale_color_OkabeIto(order = c(8,2,1), labels = exp_labels, name = NULL) + 
+  labs(x = bquote('SNAIL1 ('*10^5~'molecules)'), y = 'ZEB1 mRNA (molecules)') +
+    geom_text(data = labels_p1, aes(x,y, label = text), fontface = "bold", inherit.aes = F, show.legend = FALSE) + 
+  coord_cartesian(xlim = c(xmin,xmax)) +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0)) + 
+  expand_limits(y = 0) +
+  theme(legend.position = "top")
+```
+
+```{targets bif_snail_pdl, tar_simple = T}
+labels_p2 <- tribble(
+  ~experiment, ~text, ~x, ~y,
+  "ifn0", "E", 180000, 24000,
+  "ifn0", "E/M", 211000, 16000,
+  "ifn0", "M", 225000, 67000,
+  "ifn1", "E", 175000, 65000,
+  "ifn1", "E/M", 200000, 115000,
+  "ifn1", "M", 210000, 310000
+) %>% mutate(x = x / 1e5)
+
+bifs_snail_data %>%
+  filter(experiment != "no_int") %>%
+  ggplot(aes(`# Values[S].InitialValue`/ 1e5, `[PM]`, group = interaction(experiment, interval), linetype = stable, color = experiment)) + 
+  geom_line(size = 1.2) + 
+  geom_vline(xintercept = 190000 / 1e5, linetype = "dashed") + 
+  scale_linetype_discrete(guide = "none", limits = c(T,F)) +
+  scale_color_OkabeIto(order = c(2,1), labels = exp_labels, name = NULL) + 
+  labs(x = bquote('SNAIL1 ('*10^5~'molecules)'), y = 'PD-L1 membrane (molecules)') +
+  geom_text(data = labels_p2, aes(x,y, label = text, color = experiment), fontface = "bold", inherit.aes = F, show.legend = FALSE) + 
+  coord_cartesian(xlim = c(xmin,xmax), ylim = c(0, 3.2e5)) +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0)) + 
+  theme(legend.position = "top")
+```
+
+
+#### IFN bifurcation
+
+```{targets bif_I_P, tar_simple = T}
+mZ_breaks_g_I_cont <- determine_BP(g_I_cont, "# Values[I (global)].InitialValue", "[mZ]")
+
+g_I_cont %>% mutate(
+  interval = findInterval(`[mZ]`, mZ_breaks_g_I_cont),
+  stable = (interval %% 2) == 0
+) -> g_I_cont_pd
+
+labels_bifIP <- tribble(
+  ~text, ~x, ~y,
+  "E", 0.075, 0.45e5,
+  "E/M", 0.075, 1.05e5,
+  "M", 0.075, 2.65e5
+)
+
+g_I_cont_pd %>%
+  ggplot(aes(`# Values[I (global)].InitialValue`, `[PM]`, group = interval, linetype = stable)) + 
+  geom_line(size = 1.2) + 
+  scale_linetype_discrete(guide = "none", limits = c(T,F)) + 
+  coord_cartesian(xlim = c(0, 0.1), ylim = c(0, 3.2e5)) +
+  geom_text(data = labels_bifIP, aes(x,y, label = text), fontface = "bold", 
+            inherit.aes = F, show.legend = FALSE) + 
+  xlab(expression(paste('IFN', gamma, ' (nM)'))) +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0)) + 
+  ylab('PD-L1 membrane (molecules)')
+```
+#### 2D bif
+
+```{targets init_model_pd, tar_simple = T}
+twod_copasi %>% 
+  drop_na() %>%
+  nest_by(`Values[I (global)].InitialValue`) -> nested
+
+nested <- nested %>%
+  mutate(
+    bps = list(determine_BP(data, "# Values[S].InitialValue", "[mZ]", res = "x"))
+  )
+
+nested %>% 
+  filter(length(bps) <= 4) %>% # sometimes too many bps are detected
+  summarize(bp_to_tibble(bps), .groups = "drop") %>%
+  rename(IFN = `Values[I (global)].InitialValue`) -> sum2
+
+
+BP1_sp <- spline(sum2$IFN, sum2$BP1, xmax = 0.1, n = 10*length(sum2$IFN))
+BP2_sp <- spline(sum2$IFN, sum2$BP2, xmax = 0.1, n = 10*length(sum2$IFN))
+BP3_sp <- spline(sum2$IFN, sum2$BP3, xmax = 0.1, n = 10*length(sum2$IFN))
+BP4_sp <- spline(sum2$IFN, sum2$BP4, xmax = 0.1, n = 10*length(sum2$IFN))
+BP_smooth <- tibble(IFN = BP1_sp$x, BP1 = BP1_sp$y, BP2 = BP2_sp$y, BP3 = BP3_sp$y, BP4 = BP4_sp$y)
+
+ggplot(BP_smooth) +
+  geom_ribbon(aes(y = IFN, xmin = xmin, xmax = xmax, fill = '{E}')) +
+  geom_ribbon(aes(y = IFN, xmin = BP4 / 1e5, xmax = xmax, fill = '{E, M}')) +
+  geom_ribbon(aes(y = IFN, xmin = BP2 / 1e5, xmax = xmax, fill = '{E, E/M, M}')) +
+  geom_ribbon(aes(y = IFN, xmin = BP1 / 1e5, xmax = xmax, fill = '{E/M, M}')) +
+  geom_ribbon(aes(y = IFN, xmin = BP3 / 1e5, xmax = xmax, fill = '{M}')) +
+  geom_vline(xintercept = 190000 / 1e5, linetype = "dashed") +
+  coord_cartesian(ylim = c(0,0.1)) +
+  labs(x = bquote('SNAIL1 ('*10^5~'molecules)'), y = expression(paste('IFN', gamma, ' (nM)')), fill = NULL) +
+  #scale_fill_manual(name = "", values = c('{E, E/M, M}' = custom.col[15], '{E, M}' = custom.col[4], '{E/M, M}' = custom.col[13], '{E}' = custom.col[6], '{M}' = custom.col[24]), limits = c('{E}', '{E, M}', '{E, E/M, M}', '{E/M, M}', '{M}')) +
+  scale_fill_OkabeIto(order = 3:7, limits = c('{E}','{E, M}', '{E, E/M, M}', '{E/M, M}', '{M}')) + 
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0), breaks = seq(0, 0.1, by =0.02))  
+```
+
+#### Combined
+
+```{targets figure2}
+list(
+  tar_target(figure2, {
+    plot_grid(bif_snail_pdl + theme_cowplot(text_size)+ theme(legend.position="top", legend.justification = "right"), 
+              bif_I_P + theme_cowplot(text_size)+ theme(legend.position="top"), 
+              bif_snail_zeb + theme_cowplot(text_size)+ theme(legend.position="top", legend.justification = "right"), 
+              init_model_pd + theme_cowplot(text_size) + theme(legend.position="top", legend.justification = "center"), 
+              labels = "AUTO", label_size = label_size, ncol = 2, align = "vh", axis = "tlbr",
+              scale = 0.99) #< allow spacing for labels
+  }),
+  tar_target(figure2_file, {
+    path <- "output/figure2.pdf"
+    ggsave(path, plot = figure2, width = 12, height = 10, device = cairo_pdf)
+  })
+)
+```
+
+
+### 3. Temporal dynamics
+
+```{targets temp_dyn_files}
+emt_td_path <- "data/emt_td"
+list(
+  tar_target(emt_no_int_file, path(emt_td_path, "EMT no interaction.txt"), format = "file"),
+  tar_target(emt_ifn0_file, path(emt_td_path, "EMT no IFN fixed.txt"), format = "file"),
+  tar_target(emt_ifn1_file, path(emt_td_path, "EMT IFN fixed.txt"), format = "file"),
+  tar_target(met_no_int_file, path(emt_td_path, "MET no interaction.txt"), format = "file"),
+  tar_target(met_ifn0_file, path(emt_td_path, "MET no IFN fixed.txt"), format = "file"),
+  tar_target(met_ifn1_file, path(emt_td_path, "MET IFN fixed.txt"), format = "file")
+)
+```
+```{targets time_dynamics_long, tar_simple = T}
+time_dynamics <- tribble(
+  ~type, ~experiment, ~file,
+  "EMT", "no_int", emt_no_int_file,
+  "EMT", "ifn0", emt_ifn0_file,
+  "EMT", "ifn1", emt_ifn1_file,
+  "MET", "no_int", met_no_int_file,
+  "MET", "ifn0", met_ifn0_file,
+  "MET", "ifn1", met_ifn1_file,
+
+) %>% 
+  rowwise() %>%
+  mutate(data = list(read_copasi(file))) %>%
+  select(-file) %>% unnest(data)
+
+time_dynamics <- time_dynamics %>%
+  mutate(
+    across(all_of(c("[mP]", "[PM]")), ~ ifelse(experiment == "no_int", NA, .x)),
+    time = `# Time`/24
+  ) %>% select(-`# Time`)
+
+time_dynamics %>% 
+  pivot_longer(cols = c(where(is.numeric), -time))
+```
+```{targets td_gvars}
+list(
+  tar_target(td_vars, c("[mu2]", "[mZ]", "[Z]", "[mP]", "[PE]", "[PG]", "[PM]", 
+                        "[mF]", "[F]")),
+  tar_target(td_labels, c(
+    "miR-200",
+    "ZEB1 mRNA ",
+    "ZEB1",
+    "PD-L1 mRNA",
+    "PD-L1 ER",
+    "PD-L1 Golgi",
+    "PD-L1 membrane",
+    "IRF1 mRNA",
+    "IRF1"
+  ) %>% setNames(td_vars)),
+  tar_target(td_vars_to_show, c("[mu2]", "[mZ]", "[Z]", "[mP]", "[PM]"))
+)
+```
+
+
+```{targets figure3, tar_simple = T}
+time_dynamics_long %>% 
+  filter(name %in% td_vars_to_show) %>%
+  mutate(experiment = factor(experiment, levels = exp_order)) %>%
+  ggplot(aes(time,value, color = experiment)) +
+  geom_line(aes(linetype = experiment), size = 1.2) +
+  facet_grid(rows = vars(factor(name, levels = td_vars)), cols = vars(type), 
+             scales = "free_y", switch = "y",
+             labeller = labeller(.rows = as_labeller(td_labels))) +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = expansion(mult = c(0,0.05))) +
+  expand_limits(y = 0) + 
+  scale_color_OkabeIto(order = c(8,2,1), labels = exp_labels, name = NULL) +
+  scale_linetype_manual(values = c("dashed", "solid", "solid"), labels = exp_labels, name = NULL) + 
+  labs(x = "Time (days)", y = "Regulator (molecules)") + 
+  theme_cowplot(text_size) + 
+  panel_border() +
+  #background_grid() + 
+  theme(strip.placement = 'outside', 
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 1.2*text_size, face = "bold"),
+        panel.spacing.x = unit(1, "lines"),
+        legend.position = "top",
+        legend.justification = "right")
+```
+
+#### Combined
+
+```{targets fig3}
+  tar_target(figure3_file, {
+    path <- "output/figure3.pdf"
+    ggsave(path, plot = figure3, width = 12, height = 10, device = cairo_pdf)
+  })
+```
+
+
+## SI
+
+### S1. STAT-PDL model
+
+```{targets statpdl_model}
+list(
+  tar_target(statpdl_model_file, "data/inkscape/statpdl1.svg", format = "file"),
+  tar_target(statpdl_model_fig, 
+             ggdraw() + draw_image(image_read(statpdl_model_file, density = 300)))
+)
+```
+
+```{targets statpdl_tc_plot, tar_simple = T}
+vars <- c( "[mP]", "[PE]", "[PG]", "[PM]", "[mF]", "[F]")
+labels <- c(
+  "PD-L1 mRNA",
+  "PD-L1 ER",
+  "PD-L1 Golgi",
+  "PD-L1 membrane",
+  "IRF1 mRNA",
+  "IRF1 protein"
+) %>% setNames(vars)
+var_order <- c("[mF]", "[F]", "[mP]", "[PE]", "[PG]", "[PM]")
+
+ifnpdl_timecourse %>%
+  select(-`[STAT]`) %>%
+  mutate(time = `# Time`) %>% 
+  select(-`# Time`) %>%
+  pivot_longer(cols = c(where(is.numeric), -time)) %>%
+  ggplot(aes(time,value)) +
+  geom_line(size = 1.2) +
+  facet_wrap(vars(factor(name, levels = var_order)), ncol = 2,
+             scales = "free_y",
+             labeller = as_labeller(labels)) +
+  scale_x_continuous(breaks = seq(0,48, by = 12), limits = c(0,48), expand = c(0,0)) +
+  scale_y_continuous(expand = expansion(mult = c(0,0.05))) +
+  expand_limits(y = 0) + 
+  labs(x = "Time (hours)", y = "(molecules)") + 
+  theme_cowplot(text_size) + 
+  panel_border() +
+  #background_grid() + 
+  theme(strip.background = element_blank())
+```
+
+#### Combined
+
+```{targets si_statpdl_model, tar_simple = T}
+plot_grid(statpdl_model_fig, statpdl_tc_plot, 
+          nrow = 1, rel_widths = c(1, 2),
+          labels = "AUTO", label_size = label_size)
+```
+
+```{targets si_statpdl_model_file, tar_simple = T}
+path <- "output/si_statpdl_model.pdf"
+ggsave(path, plot = si_statpdl_model, width = 8, height = 4, device = cairo_pdf)
+```
+
+### S2. Simplified model
+
+```{targets si_simplified}
+list(
+  tar_target(simp_model_file, "data/inkscape/TCSandPDL1_wo_jakstat.svg", format = "file"),
+  tar_target(simple_model_2d_bif_file, "data/bifs/core_emt_plus_pdl_2d_bif.txt.xz", format = "file"),
+  tar_target(simple_model_2d_bif, read_copasi(simple_model_2d_bif_file))
+)
+```
+
+```{targets si_simp_2d_bif, tar_simple = T}
+simple_model_2d_bif %>% 
+  drop_na() %>%
+  nest_by(`Values[F].InitialValue`) -> nested
+
+nested <- nested %>%
+  mutate(
+    bps = list(determine_BP(data, "# Values[S].InitialValue", "[mZ]", res = "x"))
+  )
+
+nested %>% 
+  filter(length(bps) <= 4) %>% # sometimes too many bps are detected
+  summarize(bp_to_tibble(bps), .groups = "drop") %>%
+  rename(FF = `Values[F].InitialValue`) -> sum2
+
+spline_xmax <- 3e5
+BP1_sp <- spline(sum2$FF, sum2$BP1, xmax = spline_xmax, n = 10*length(sum2$FF))
+BP2_sp <- spline(sum2$FF, sum2$BP2, xmax = spline_xmax, n = 10*length(sum2$FF))
+BP3_sp <- spline(sum2$FF, sum2$BP3, xmax = spline_xmax, n = 10*length(sum2$FF))
+BP4_sp <- spline(sum2$FF, sum2$BP4, xmax = spline_xmax, n = 10*length(sum2$FF))
+BP_smooth <- tibble(FF = BP1_sp$x, BP1 = BP1_sp$y, BP2 = BP2_sp$y, BP3 = BP3_sp$y, BP4 = BP4_sp$y)
+
+p2 <- ggplot(BP_smooth) +
+  geom_ribbon(aes(y = FF, xmin = xmin, xmax = xmax, fill = '{E}')) +
+  geom_ribbon(aes(y = FF, xmin = BP4 / 1e5, xmax = xmax, fill = '{E, M}')) +
+  geom_ribbon(aes(y = FF, xmin = BP2 / 1e5, xmax = xmax, fill = '{E, E/M, M}')) +
+  geom_ribbon(aes(y = FF, xmin = BP1 / 1e5, xmax = xmax, fill = '{E/M, M}')) +
+  geom_ribbon(aes(y = FF, xmin = BP3 / 1e5, xmax = xmax, fill = '{M}')) +
+  coord_cartesian(ylim = c(0,300000)) +
+  labs(x = bquote('SNAIL1 ('*10^5~'molecules)'), y = "I (molecules)", fill = NULL) +
+  #scale_fill_manual(name = "", values = c('{E, E/M, M}' = custom.col[15], '{E, M}' = custom.col[4], '{E/M, M}' = custom.col[13], '{E}' = custom.col[6], '{M}' = custom.col[24]), limits = c('{E}', '{E, M}', '{E, E/M, M}', '{E/M, M}', '{M}')) +
+  scale_fill_OkabeIto(order = 3:7, limits = c('{E}','{E, M}', '{E, E/M, M}', '{E/M, M}', '{M}')) + 
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0)) +
+  theme_cowplot(text_size)
+```
+
+#### Combined
+
+```{targets si_simp_output}
+list(
+  tar_target(si_simp_output,
+    plot_grid(ggdraw() + draw_image(image_read(simp_model_file, density = 300)), 
+              si_simp_2d_bif + theme(legend.position="top", legend.justification = "center"),
+          nrow = 1, rel_widths = c(1,1),
+          labels = c("A", "B"), label_size = label_size, scale = 0.90)
+  ),
+  tar_target(si_simp_file, {
+    path <- "output/si_simplified_model.pdf"
+    ggsave(path, plot = si_simp_output, width = 12, height = 4, device = cairo_pdf)
+  })
+)
+```
+
+### S3. Sensitivity
+
+```{targets sens_files}
+list(
+  tar_files_input(sens_files_sep,
+                  fs::path("data/sensitivity/",
+                           c("lmp2 0.16.txt.xz",
+                             "lmp2 0.18.txt.xz",
+                             "lmp2 0.22.txt.xz",
+                             "lmp2 0.24.txt.xz",
+                             "lmp3 0.8.txt.xz",
+                             "lmp3 0.9.txt.xz",
+                             "lmp3 1.1.txt.xz",
+                             "lmp3 1.2.txt.xz",
+                             "lmump2 0.04.txt.xz",
+                             "lmump2 0.045.txt.xz",
+                             "lmump2 0.055.txt.xz",
+                             "lmump2 0.06.txt.xz",
+                             "lmump3 0.8.txt.xz",
+                             "lmump3 0.9.txt.xz",
+                             "lmump3 1.1.txt.xz",
+                             "lmump3 1.2.txt.xz",
+                             "ltp1 0.8.txt.xz",
+                             "ltp1 0.9.txt.xz",
+                             "ltp1 1.1.txt.xz",
+                             "ltp1 1.2.txt.xz",
+                             "ltp2 0.24.txt.xz",
+                             "ltp2 0.27.txt.xz",
+                             "ltp2 0.33.txt.xz",
+                             "ltp2 0.36.txt.xz",
+                             "ltp3 0.04.txt.xz",
+                             "ltp3 0.045.txt.xz",
+                             "ltp3 0.055.txt.xz",
+                             "ltp3 0.06.txt.xz",
+                             "mu2_0 lmp 11000.txt.xz",
+                             "mu2_0 lmp 12000.txt.xz",
+                             "mu2_0 lmp 8000.txt.xz",
+                             "mu2_0 lmp 9000.txt.xz",
+                             "mu2_0 lmump 11000.txt.xz",
+                             "mu2_0 lmump 12000.txt.xz",
+                             "mu2_0 lmump 8000.txt.xz",
+                             "mu2_0 lmump 9000.txt.xz",
+                             "mu2_0 ltp 11000.txt.xz",
+                             "mu2_0 ltp 12000.txt.xz",
+                             "mu2_0 ltp 8000.txt.xz",
+                             "mu2_0 ltp 9000.txt.xz")
+                  )
+  ),
+  tar_target(sens_file_unchanged, "data/sensitivity/unchanged.txt.xz", format = "file")
+)
+```
+```{targets sens_tibble}
+list(
+  tar_target(meta, {
+    meta <- tibble(file = sens_files_sep) %>%
+
+      # extract parameter and value from file name
+      mutate(str_match(path_file(file), "(.*) ([\\d\\.]+[\\d])(\\.txt)?")[,c(2,3)] %>% 
+               `colnames<-`(c("par", "val")) %>%
+               as_tibble()) %>% 
+      mutate(val = as.numeric(val)) %>% 
+      # sort before adding change
+      group_by(par) %>%
+      arrange(val, .by_group = T) %>%
+      # add change (every parameter has -20%, -10%, +10%, +20%)
+      mutate(change = rep_along(val, c(-0.2, -0.1, 0.1, 0.2))) %>%
+      # add unchanged.txt
+      ungroup() %>%
+      add_row(tibble_row(file = sens_file_unchanged, par = "base", change = 0))
+  }),
+  tar_target(all_nested, {
+    meta %>%
+      # read data
+      rowwise() %>%
+      mutate(data = list(read_copasi(file))) %>%
+      select(-file) %>%
+      # computate bifurcation
+      mutate(bp = list(determine_BP(data, "# Values[S].InitialValue", "[mZ]"))) %>%
+      # include bp info in data
+      mutate(data = list(data %>% mutate(interval = findInterval(`[mZ]`, bp)))) %>%
+      select(-bp)
+  }),
+  tar_target(par_meta, {
+    par_meta <- tribble(
+      ~par, ~col, ~row,
+      "lmp2", "mRNA_PD-L1", "l2",
+      "lmp3", "mRNA_PD-L1", "l3",
+      "lmump2", "miR-200", "l2",
+      "lmump3", "miR-200", "l3",
+      "ltp1", "PD-L1_ER", "l1",
+      "ltp2", "PD-L1_ER", "l2",
+      "ltp3", "PD-L1_ER", "l3",
+      "mu2_0 lmp", "mRNA_PD-L1", "mu0", 
+      "mu2_0 lmump", "miR-200" ,"mu0",
+      "mu2_0 ltp", "PD-L1_ER", "mu0"
+    )
+    
+    # l1, l2, and l3, are really l0, l1, and l2
+    row_names <- c(paste0("l", 1:3), "mu0")
+    row_labels <- c(
+      expression(gamma[mu*0]/gamma["m"*0]/"l"[0]),
+      expression(gamma[mu*1]/gamma["m"*1]/"l"[1]),
+      expression(gamma[mu*2]/gamma["m"*2]/"l"[2]),
+      expression(mu[0])
+    ) %>% setNames(row_names)
+    
+    col_names <- c("miR-200", "mRNA_PD-L1", "PD-L1_ER")
+    col_labels <- c(
+      expression("miR-200 (Y"[mu]*")"),
+      expression("mRNA PD-L1 (Y"["m"]*")"),
+      expression("PD-L1 in ER (L)"[])
+    ) %>% setNames(col_names)
+    
+    par_meta %>% mutate(
+      row = factor(row, labels = row_labels),
+      col = factor(col, labels = col_labels)
+    )
+  }),
+  tar_target(sens_labels, {
+    vars <- c("lmp2", "lmp3", "lmump2", "lmump3", "ltp1", "ltp2", "ltp3", "mu2_0 lmp", "mu2_0 lmump", "mu2_0 ltp")
+    c(expression('l'[mP2]),
+      expression('l'[mP3]),
+      expression('l'[paste(mu,'mP2')]),
+      expression('l'[paste(mu,'mP3')]),
+      expression('l'[tP1]),
+      expression('l'[tP2]),
+      expression('l'[tP3]),
+      expression(paste(mu['0'], ' ', '(L'['p'['mP']], ')')),
+      expression(paste(mu['0'], ' ', '(L'['p'[paste(mu,'mP')]], ')')),
+      expression(paste(mu['0'], ' ', '(L'['p'['tP']], ')'))
+    ) %>% setNames(vars)
+  }),
+  tar_target(sens_xmin, 170000 / 1e5),
+  tar_target(sens_xmax, 220000 / 1e5)
+)
+
+```
+```{targets sens_plot}
+list(
+  tar_target(sens_all, {
+    # add model value to all pars (plotting from 2 different data frames I didn't get working)
+    sens <- all_nested %>% filter(par != "base")
+    base_add <- sens %>% expand(par) %>% add_column(all_nested %>% filter(par == "base") %>% select(-par))
+    all <- bind_rows(sens, base_add) %>%
+      unnest(cols = data) %>%
+      mutate(stable = (interval %% 2) == 0) %>%
+      mutate(change = factor(change,
+                             levels = c(-0.2, -0.1, 0, 0.1, 0.2),
+                             labels = c("-20%", "-10%", "Model value", "+10%", "+20%"),
+                             ordered = T))
+  }),
+  tar_target(sens_pdl_plot, {
+    sens_all %>%
+      left_join(par_meta, by = "par") %>%
+      mutate(par = factor(par, labels = sens_labels)) %>%
+      filter(row != "mu[0]") %>%
+      ggplot(aes(`# Values[S].InitialValue` / 1e5, `[PM]`, linetype = stable, 
+                 color = change, group = interaction(interval, change)))+ 
+      geom_line(size = 1) +
+      facet_grid(rows = vars(row), cols = vars(col), labeller = label_parsed) + 
+      scale_linetype_discrete(guide = "none", limits = c(T,F)) +
+      scale_color_discrete_diverging(palette = "Blue-Red") +
+      labs(color = NULL,
+           x = bquote('SNAIL1 ('*10^5~'molecules)'), 
+           y = 'Membrane PD-L1 (molecules)'
+      ) +
+      theme_cowplot(font_size = text_size) +
+      theme(
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 1.2*text_size, face = "bold"),
+        strip.text.y = element_text(size = 1.2*text_size, face = "bold"),
+        legend.position = "bottom",
+        legend.justification = "center",
+        axis.text.x=element_text(angle = 45, hjust = 1)
+      ) + 
+      panel_border() + 
+      coord_cartesian(xlim = c(sens_xmin,sens_xmax)) +
+      scale_y_log10()
+  }),
+  tar_target(sens_zeb_plot, {
+    sens_all %>%
+      left_join(par_meta, by = "par") %>%
+      mutate(par = factor(par, labels = sens_labels)) %>%
+      filter(row != "mu[0]") %>%
+      ggplot(aes(`# Values[S].InitialValue` / 1e5, `[Z]`, linetype = stable, color = change, group = interaction(interval, change)))+ 
+      geom_line(size = 1) +
+      facet_grid(rows = vars(row), cols = vars(col), labeller = label_parsed) + 
+      scale_linetype_discrete(guide = "none", limits = c(T,F)) +
+      scale_color_discrete_diverging(palette = "Blue-Red") +
+      labs(color = NULL,
+           x = bquote('SNAIL1 ('*10^5~'molecules)'), 
+           y = 'ZEB1 (molecules)'
+      ) +
+      theme_cowplot(font_size = text_size) +
+      #theme_cowplot() + #< for cvd_grid
+      theme(
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 1.2*text_size, face = "bold"),
+        strip.text.y = element_text(size = 1.2*text_size, face = "bold"),
+        legend.position = "bottom",
+        legend.justification = "center",
+        #axis.text.x=element_text(angle = 45, hjust = 1)
+      ) + 
+      panel_border() + 
+      coord_cartesian(xlim = c(sens_xmin,sens_xmax)) +
+      scale_y_log10()
+  })
+)
+
+```
+
+#### Combined
+
+```{targets sens_comb}
+list(
+  tar_target(sens_comb, {
+    plot_grid(
+      sens_pdl_plot + theme(axis.title.x=element_blank(), 
+                            axis.text.x=element_blank()),
+      sens_zeb_plot + theme(legend.position="none",
+                            strip.background.x = element_blank(), 
+                            strip.text.x = element_blank()),
+      ncol = 1)
+  }),
+  tar_target(sens_comb_file, {
+    path <- "output/si_sens_mir_pars.pdf"
+    ggsave(path, plot = sens_comb, width = 10, height = 14, device = cairo_pdf)
+  })
+)
+```
+### S4. Alt temp dynamics
+
+```{targets temp_dyn_alt_files}
+list(
+  tar_target(emt_ifn1_alt_file, "data/emt_td/EMT_different_time_dynamics.txt", format = "file"),
+  tar_target(met_ifn1_alt_file, "data/emt_td/MET_different_time_dynamics.txt", format = "file")
+)
+```
+
+```{targets time_dynamics_alt_long, tar_simple = T}
+time_dynamics <- tribble(
+  ~type, ~experiment, ~file,
+  "EMT", "no_int", emt_no_int_file,
+  "EMT", "ifn0", emt_ifn0_file,
+  "EMT", "ifn1", emt_ifn1_alt_file,
+  "MET", "no_int", met_no_int_file,
+  "MET", "ifn0", met_ifn0_file,
+  "MET", "ifn1", met_ifn1_alt_file,
+
+) %>% 
+  rowwise() %>%
+  mutate(data = list(read_copasi(file))) %>%
+  select(-file) %>% unnest(data)
+
+time_dynamics <- time_dynamics %>%
+  mutate(
+    across(all_of(c("[mP]", "[PM]")), ~ ifelse(experiment == "no_int", NA, .x)),
+    time = `# Time`/24
+  ) %>% select(-`# Time`)
+
+time_dynamics %>% 
+  pivot_longer(cols = c(where(is.numeric), -time))
+```
+
+```{targets figure3_alt, tar_simple = T}
+time_dynamics_alt_long %>% 
+  filter(name %in% td_vars_to_show) %>%
+  mutate(experiment = factor(experiment, levels = exp_order)) %>%
+  ggplot(aes(time,value, color = experiment)) +
+  geom_line(aes(linetype = experiment), size = 1.2) +
+  facet_grid(rows = vars(factor(name, levels = td_vars)), cols = vars(type), 
+             scales = "free_y", switch = "y",
+             labeller = labeller(.rows = as_labeller(td_labels))) +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = expansion(mult = c(0,0.05))) +
+  expand_limits(y = 0) + 
+  scale_color_OkabeIto(order = c(8,2,1), labels = exp_labels, name = NULL) +
+  scale_linetype_manual(values = c("dashed", "solid", "solid"), labels = exp_labels, name = NULL) + 
+  labs(x = "Time (days)", y = "Regulator (molecules)") + 
+  theme_cowplot(text_size) + 
+  panel_border() +
+  #background_grid() + 
+  theme(strip.placement = 'outside', 
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 1.2*text_size, face = "bold"),
+        panel.spacing.x = unit(1, "lines"),
+        legend.position = "top",
+        legend.justification = "right")
+```
+#### Combined
+
+```{targets fig3_alt}
+  tar_target(figure3_alt_file, {
+    path <- "output/si_temp_dynamics_timescales.pdf"
+    ggsave(path, plot = figure3_alt, width = 12, height = 10, device = cairo_pdf)
+  })
+```
+
+### S5. Jak-Stat steady state
+
+```{targets jakstat-ss}
+list(
+  tar_target(jakstat_ss_file, "data/jakstat_ss.txt", format = "file"),
+  tar_target(jakstat, read_copasi(jakstat_ss_file))
+)
+```
+
+```{targets jakstat_rename, tar_simple = T}
+jakstat %>% 
+  select(ifn = `# Values[IFN].InitialValue`, 
+         stat = `[x10]`)
+```
+
+
+```{targets jsff_spline, tar_simple = T}
+jakstat_for_fit <- jakstat_rename %>% 
+  filter(ifn < 0.3)
+spline(jakstat_for_fit$ifn, jakstat_for_fit$stat) %>% 
+  as_tibble() %>% 
+  setNames(c("ifn", "stat"))
+```
+```{targets g3fit, tar_simple = T}
+drc::drm(stat ~ ifn, fct = G.3(), data = jsff_spline)
+```
+```{targets jakstat_fit, tar_simple = T}
+jakstat_rename %>%
+  mutate(
+    g3 = predict(g3fit, newdata = data.frame(ifn = ifn))
+  ) %>%
+  pivot_longer(-ifn) %>%
+  mutate(name = factor(name, levels = c("stat", "g3"))) %>%
+  ggplot(aes(x = ifn, y = value, color = name)) + 
+  geom_line(size = 1) +
+  theme_cowplot(font_size = text_size) + 
+  coord_cartesian(xlim = c(0,0.3)) + 
+  scale_color_manual(name = NULL, 
+                     labels = c("Steady state", "G.3 fit"), 
+                     values = c("black", "red")) +
+  labs(x = expression(paste('IFN', gamma, ' (nM)')), 
+       y = "STAT1p_2 (nM)") +
+  theme_cowplot(font_size = text_size) +
+  theme(legend.position = "top",
+        legend.justification = "right")
+```
+#### Combined
+
+```{targets si_jakstat-ss}
+  tar_target(jakstat_fit_file, {
+    path <- "output/si_jakstat_fit.pdf"
+    ggsave(path, plot = jakstat_fit, width = 8, height = 4, device = cairo_pdf)
+  })
+```
+
+
+# Pipeline
+
+```{r}
+tar_make()
+```
