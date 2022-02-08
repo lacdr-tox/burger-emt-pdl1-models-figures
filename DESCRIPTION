@@ -20,6 +20,7 @@ Imports:
     tidyverse
 Suggests:
     rmarkdown,
+    markdown,
     knitr
 Remotes: 
     ropensci/targets,

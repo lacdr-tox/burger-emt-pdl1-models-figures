@@ -23,7 +23,11 @@ Figures are generated reproducibly in R using
 [`renv`](https://rstudio.github.io/renv/index.html) and
 [`targets`](https://docs.ropensci.org/targets/):
 
-1.  Run
+1.  Download/clone this repository
+
+2.  Open the project file (`.Rproj`) in RStudio
+
+3.  Run
 
     ``` r
     renv::restore()
@@ -31,8 +35,8 @@ Figures are generated reproducibly in R using
 
     to install R package dependencies.
 
-2.  Open `targets.Rmd` in RStudio and choose *Run* > *Run All*. Figures
-    will appear in the `output` folder.
+4.  Open `targets.Rmd` and choose *Run* > *Run All*. Figures will appear
+    in the `output` folder.
 
 ------------------------------------------------------------------------
 
