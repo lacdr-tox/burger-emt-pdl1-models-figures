@@ -13,10 +13,12 @@ options(scipen=999)
 # Packages
 
 ```{r, eval = FALSE}
+# DON'T USE use renv::restore
+# also DESCRIPTION now handles dependencies for renv
 install.packages("remotes")
 remotes::install_github("ropensci/targets")
 remotes::install_github("clauswilke/colorblindr")
-remotes::install_cran(c("drc", "jpeg", "colorspace", "grid", "cowplot", "magick", "future", "future.callr", "targets", "tarchetypes", "scales", "parallel", "glue", "colorblindr", "patchwork", "fs", "magick", "rootSolve" 'tidyverse'))
+remotes::install_cran(c("drc", "colorspace", "grid", "cowplot", "magick", "targets", "tarchetypes", "scales", "glue", "colorblindr", "fs", "rootSolve", 'tidyverse'))
                       
 source("R/functions.R")
 source("R/common_plotstuff.R")
@@ -53,12 +55,8 @@ options(tidyverse.quiet = TRUE)
 options(scipen=999)
 source("R/functions.R")
 source("R/common_plotstuff.R")
-tar_option_set(packages = c("drc", "future", "future.callr", "cowplot", "magick", "jpeg", "grid",  "colorspace", "tarchetypes", "scales", "parallel", "glue", "magrittr", "colorblindr", "patchwork", "fs", "magick", "rootSolve", "tidyverse"))
+tar_option_set(packages = c("drc", "cowplot", "magick", "grid",  "colorspace", "tarchetypes", "scales", "glue", "magrittr", "colorblindr", "fs", "rootSolve", "tidyverse"))
 library(tarchetypes)
-library(future)
-library(future.callr)
-plan(callr)
-tar_config_set(workers = 12)
 
 text_size <- 15
 label_size <- round(text_size *1.5)

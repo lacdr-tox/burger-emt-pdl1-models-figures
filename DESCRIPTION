@@ -1,0 +1,26 @@
+Type: project
+Description: Model plus code to generate figures for Burger et al. 2022. 
+    Bidirectional Crosstalk Between Epithelial-Mesenchymal Plasticity and 
+    IFNγ-Induced PD-L1 Expression Promotes Tumor Progression. bioRxiv. 
+    https://doi.org/10.1101/2022.02.03.478950 
+Imports:
+    targets,
+    tarchetypes,
+    drc,
+    rootSolve,
+    cowplot,
+    magick,
+    grid,
+    colorspace,
+    scales,
+    colorblindr,
+    fs,
+    glue,
+    magrittr,
+    tidyverse
+Suggests:
+    rmarkdown,
+    knitr
+Remotes: 
+    ropensci/targets,
+    clauswilke/colorblindr
