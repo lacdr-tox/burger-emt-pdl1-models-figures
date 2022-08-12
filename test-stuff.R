@@ -1,6 +1,9 @@
 library(tidyverse)
 library(interp)
+library(cowplot)
 theme_set(theme_minimal())
+text_size <- 15
+label_size <- round(text_size *1.5)
 
 twod_copasi %>% 
   drop_na() %>%
@@ -148,16 +151,23 @@ plot_data <- bind_rows(interped_data_corr, averaged %>% add_column(emt = "Averag
   mutate(emt = factor(emt, levels = c("E", "E/M", "M", "Average")))
 
 (pp <- plot_data %>%
-#    (pp <- simple_sum2 %>% mutate(S = S / 1e5) %>%
-    ggplot(aes(S ,IFN, z = `[PM]`)) + 
-    #geom_contour_filled() +
-  geom_raster(aes(fill = `[PM]`)) + 
+    ggplot(aes(S,IFN)) + 
+  geom_raster(aes(fill = `[PM]` / 1e5)) + 
     facet_wrap(vars(emt), nrow = 1) +
-  scale_fill_viridis_c())
+  scale_fill_viridis_c(limits = function(x) {x[1] <- 0; x}) +
+  labs(x = bquote('SNAIL1 ('*10^5~'molecules)'),
+       y = expression(paste('IFN', gamma, ' (nM)')),
+       fill = bquote('PD-L1 membrane ('*10^5~'molecules)')))
 
 
 (p1 <- pp + geom_path(data = BP_smooth %>% pivot_longer(cols = starts_with("BP")), 
                      aes(x = value / 1e5, y = IFN, group = name), 
                      inherit.aes = F, size = 2, color = "white"))
 
-  
+p1 + coord_cartesian(expand = F) + 
+  theme_cowplot(text_size) + 
+  panel_border() +
+  theme(strip.background = element_blank()) + 
+  theme(legend.position="top", 
+        legend.justification = "right") 
+
