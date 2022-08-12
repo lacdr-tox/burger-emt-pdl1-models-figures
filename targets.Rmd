@@ -114,10 +114,10 @@ list(
 list(
   tar_target(labels_p1, tribble(
     ~text, ~x, ~y,
-    "E", 187000, 90,
-    "E/M", 205000, 410,
+    "E", 187000, 110,
+    "E/M", 205000, 420,
     "M", 205000, 920
-  )),
+  ) %>% mutate(x = x / 1e5)),
   tar_target(stcs_data_wbp, 
              core %>%
                nest(data = everything()) %>%
@@ -215,7 +215,9 @@ stcs_plot +
   geom_segment(data = ss_data_minmax, aes(x = 2.15, y = mZ_low, color = emt,
                                        xend = 2.15, yend = mZ_high),
              size = 1.2, arrow = arrow(length = unit(0.1, "inches"), type = "closed"), 
-             inherit.aes = F, show.legend = F)
+             inherit.aes = F, show.legend = F) + 
+  geom_text(data = labels_p1, aes(x,y, label = text), 
+            fontface = "bold", inherit.aes = F, show.legend = FALSE)  
 ```
 
 
