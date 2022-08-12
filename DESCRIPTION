@@ -23,5 +23,4 @@ Suggests:
     markdown,
     knitr
 Remotes: 
-    ropensci/targets,
     clauswilke/colorblindr

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- generated with COPASI 4.34 (Build 251) (http://www.copasi.org) at 2021-12-17T20:19:31Z -->
+<!-- generated with COPASI 4.36 (Build 260) (http://www.copasi.org) at 2022-08-25T14:59:48Z -->
 <?oxygen RNGSchema="http://www.copasi.org/static/schema/CopasiML.rng" type="xml"?>
-<COPASI xmlns="http://www.copasi.org/static/schema" versionMajor="4" versionMinor="34" versionDevel="251" copasiSourcesModified="0">
+<COPASI xmlns="http://www.copasi.org/static/schema" versionMajor="4" versionMinor="36" versionDevel="260" copasiSourcesModified="0">
   <ListOfFunctions>
     <Function key="Function_40" name="R6 function" type="UserDefined" reversible="false">
       <MiriamAnnotation>
@@ -372,9 +372,7 @@
     <ListOfMetabolites>
       <Metabolite key="Metabolite_0" name="Z" simulationType="reactions" compartment="Compartment_0" addNoise="false">
         <MiriamAnnotation>
-<rdf:RDF
-   xmlns:dcterms="http://purl.org/dc/terms/"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <rdf:Description rdf:about="#Metabolite_0">
     <dcterms:created>
       <rdf:Description>
@@ -383,7 +381,6 @@
     </dcterms:created>
   </rdf:Description>
 </rdf:RDF>
-
         </MiriamAnnotation>
       </Metabolite>
       <Metabolite key="Metabolite_1" name="mu2" simulationType="reactions" compartment="Compartment_0" addNoise="false">
@@ -414,9 +411,7 @@
       </Metabolite>
       <Metabolite key="Metabolite_3" name="mP" simulationType="reactions" compartment="Compartment_0" addNoise="false">
         <MiriamAnnotation>
-<rdf:RDF
-   xmlns:dcterms="http://purl.org/dc/terms/"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <rdf:Description rdf:about="#Metabolite_3">
     <dcterms:created>
       <rdf:Description>
@@ -425,7 +420,6 @@
     </dcterms:created>
   </rdf:Description>
 </rdf:RDF>
-
         </MiriamAnnotation>
       </Metabolite>
       <Metabolite key="Metabolite_4" name="PM" simulationType="reactions" compartment="Compartment_0" addNoise="false">
@@ -471,8 +465,7 @@
       </ModelValue>
       <ModelValue key="ModelValue_2" name="F" simulationType="fixed" addNoise="false">
         <MiriamAnnotation>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
-
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />
         </MiriamAnnotation>
       </ModelValue>
     </ListOfModelValues>
@@ -497,26 +490,26 @@
           <Modifier metabolite="Metabolite_1" stoichiometry="1"/>
         </ListOfModifiers>
         <ListOfConstants>
-          <Constant key="Parameter_4995" name="g_Z" value="100"/>
-          <Constant key="Parameter_4994" name="f_1" value="1"/>
-          <Constant key="Parameter_4998" name="mu2_0" value="10000"/>
-          <Constant key="Parameter_4996" name="f_2" value="0.6"/>
-          <Constant key="Parameter_4999" name="f_3" value="0.3"/>
-          <Constant key="Parameter_5000" name="f_4" value="0.1"/>
-          <Constant key="Parameter_5004" name="f_5" value="0.05"/>
-          <Constant key="Parameter_5006" name="f_6" value="0.05"/>
-          <Constant key="Parameter_5007" name="f_7" value="0.05"/>
+          <Constant key="Parameter_6172" name="g_Z" value="100"/>
+          <Constant key="Parameter_6171" name="f_1" value="1"/>
+          <Constant key="Parameter_6174" name="mu2_0" value="10000"/>
+          <Constant key="Parameter_6175" name="f_2" value="0.6"/>
+          <Constant key="Parameter_6176" name="f_3" value="0.3"/>
+          <Constant key="Parameter_6177" name="f_4" value="0.1"/>
+          <Constant key="Parameter_6181" name="f_5" value="0.05"/>
+          <Constant key="Parameter_6185" name="f_6" value="0.05"/>
+          <Constant key="Parameter_6183" name="f_7" value="0.05"/>
         </ListOfConstants>
         <KineticLaw function="Function_41" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
             <CallParameter functionParameter="FunctionParameter_261">
-              <SourceParameter reference="Parameter_4995"/>
+              <SourceParameter reference="Parameter_6172"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_262">
               <SourceParameter reference="Metabolite_2"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_250">
-              <SourceParameter reference="Parameter_4994"/>
+              <SourceParameter reference="Parameter_6171"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_265">
               <SourceParameter reference="Metabolite_1"/>
@@ -525,22 +518,22 @@
               <SourceParameter reference="ModelValue_1"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_267">
-              <SourceParameter reference="Parameter_4996"/>
+              <SourceParameter reference="Parameter_6175"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_268">
-              <SourceParameter reference="Parameter_4999"/>
+              <SourceParameter reference="Parameter_6176"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_269">
-              <SourceParameter reference="Parameter_5000"/>
+              <SourceParameter reference="Parameter_6177"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_270">
-              <SourceParameter reference="Parameter_5004"/>
+              <SourceParameter reference="Parameter_6181"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_271">
-              <SourceParameter reference="Parameter_5006"/>
+              <SourceParameter reference="Parameter_6185"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_272">
-              <SourceParameter reference="Parameter_5007"/>
+              <SourceParameter reference="Parameter_6183"/>
             </CallParameter>
           </ListOfCallParameters>
         </KineticLaw>
@@ -561,12 +554,12 @@
           <Substrate metabolite="Metabolite_0" stoichiometry="1"/>
         </ListOfSubstrates>
         <ListOfConstants>
-          <Constant key="Parameter_5001" name="k_Z" value="0.1"/>
+          <Constant key="Parameter_6180" name="k_Z" value="0.1"/>
         </ListOfConstants>
         <KineticLaw function="Function_44" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
             <CallParameter functionParameter="FunctionParameter_302">
-              <SourceParameter reference="Parameter_5001"/>
+              <SourceParameter reference="Parameter_6180"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_301">
               <SourceParameter reference="Metabolite_0"/>
@@ -593,43 +586,43 @@
           <Modifier metabolite="Metabolite_0" stoichiometry="1"/>
         </ListOfModifiers>
         <ListOfConstants>
-          <Constant key="Parameter_5003" name="g_mu2" value="2100"/>
-          <Constant key="Parameter_5002" name="l_2" value="0.1"/>
-          <Constant key="Parameter_5005" name="Z0_2" value="220000"/>
-          <Constant key="Parameter_5008" name="n_2" value="3"/>
-          <Constant key="Parameter_5009" name="l_4" value="0.1"/>
-          <Constant key="Parameter_5018" name="S" value="180000"/>
-          <Constant key="Parameter_5016" name="S0_4" value="180000"/>
-          <Constant key="Parameter_5015" name="n_4" value="2"/>
+          <Constant key="Parameter_6179" name="g_mu2" value="2100"/>
+          <Constant key="Parameter_6178" name="l_2" value="0.1"/>
+          <Constant key="Parameter_6182" name="Z0_2" value="220000"/>
+          <Constant key="Parameter_6184" name="n_2" value="3"/>
+          <Constant key="Parameter_6186" name="l_4" value="0.1"/>
+          <Constant key="Parameter_6194" name="S" value="180000"/>
+          <Constant key="Parameter_6195" name="S0_4" value="180000"/>
+          <Constant key="Parameter_6192" name="n_4" value="2"/>
         </ListOfConstants>
         <KineticLaw function="Function_46" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
             <CallParameter functionParameter="FunctionParameter_297">
-              <SourceParameter reference="Parameter_5003"/>
+              <SourceParameter reference="Parameter_6179"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_298">
-              <SourceParameter reference="Parameter_5002"/>
+              <SourceParameter reference="Parameter_6178"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_296">
               <SourceParameter reference="Metabolite_0"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_295">
-              <SourceParameter reference="Parameter_5005"/>
+              <SourceParameter reference="Parameter_6182"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_294">
-              <SourceParameter reference="Parameter_5008"/>
+              <SourceParameter reference="Parameter_6184"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_293">
-              <SourceParameter reference="Parameter_5009"/>
+              <SourceParameter reference="Parameter_6186"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_303">
               <SourceParameter reference="ModelValue_0"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_304">
-              <SourceParameter reference="Parameter_5016"/>
+              <SourceParameter reference="Parameter_6195"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_305">
-              <SourceParameter reference="Parameter_5015"/>
+              <SourceParameter reference="Parameter_6192"/>
             </CallParameter>
           </ListOfCallParameters>
         </KineticLaw>
@@ -653,14 +646,14 @@
           <Modifier metabolite="Metabolite_2" stoichiometry="1"/>
         </ListOfModifiers>
         <ListOfConstants>
-          <Constant key="Parameter_5019" name="j_mu2_1" value="0"/>
-          <Constant key="Parameter_5017" name="mu2_0" value="10000"/>
-          <Constant key="Parameter_5013" name="j_mu2_2" value="0.005"/>
-          <Constant key="Parameter_5011" name="j_mu2_3" value="0.1"/>
-          <Constant key="Parameter_5010" name="j_mu2_4" value="1.5"/>
-          <Constant key="Parameter_5014" name="j_mu2_5" value="2"/>
-          <Constant key="Parameter_5012" name="j_mu2_6" value="2.5"/>
-          <Constant key="Parameter_5033" name="j_mu2_7" value="3"/>
+          <Constant key="Parameter_6196" name="j_mu2_1" value="0"/>
+          <Constant key="Parameter_6193" name="mu2_0" value="10000"/>
+          <Constant key="Parameter_6189" name="j_mu2_2" value="0.005"/>
+          <Constant key="Parameter_6190" name="j_mu2_3" value="0.1"/>
+          <Constant key="Parameter_6187" name="j_mu2_4" value="1.5"/>
+          <Constant key="Parameter_6191" name="j_mu2_5" value="2"/>
+          <Constant key="Parameter_6188" name="j_mu2_6" value="2.5"/>
+          <Constant key="Parameter_6209" name="j_mu2_7" value="3"/>
         </ListOfConstants>
         <KineticLaw function="Function_42" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
@@ -668,7 +661,7 @@
               <SourceParameter reference="Metabolite_2"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_282">
-              <SourceParameter reference="Parameter_5019"/>
+              <SourceParameter reference="Parameter_6196"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_281">
               <SourceParameter reference="Metabolite_1"/>
@@ -677,22 +670,22 @@
               <SourceParameter reference="ModelValue_1"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_279">
-              <SourceParameter reference="Parameter_5013"/>
+              <SourceParameter reference="Parameter_6189"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_278">
-              <SourceParameter reference="Parameter_5011"/>
+              <SourceParameter reference="Parameter_6190"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_277">
-              <SourceParameter reference="Parameter_5010"/>
+              <SourceParameter reference="Parameter_6187"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_276">
-              <SourceParameter reference="Parameter_5014"/>
+              <SourceParameter reference="Parameter_6191"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_275">
-              <SourceParameter reference="Parameter_5012"/>
+              <SourceParameter reference="Parameter_6188"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_274">
-              <SourceParameter reference="Parameter_5033"/>
+              <SourceParameter reference="Parameter_6209"/>
             </CallParameter>
           </ListOfCallParameters>
         </KineticLaw>
@@ -716,10 +709,10 @@
           <Modifier metabolite="Metabolite_3" stoichiometry="1"/>
         </ListOfModifiers>
         <ListOfConstants>
-          <Constant key="Parameter_5034" name="lmumP1" value="0"/>
-          <Constant key="Parameter_5021" name="lmumP2" value="0.05"/>
-          <Constant key="Parameter_5038" name="mu2_0" value="10000"/>
-          <Constant key="Parameter_5024" name="lmumP3" value="1"/>
+          <Constant key="Parameter_6211" name="lmumP1" value="0"/>
+          <Constant key="Parameter_6200" name="lmumP2" value="0.05"/>
+          <Constant key="Parameter_6234" name="mu2_0" value="10000"/>
+          <Constant key="Parameter_6201" name="lmumP3" value="1"/>
         </ListOfConstants>
         <KineticLaw function="Function_48" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
@@ -727,7 +720,7 @@
               <SourceParameter reference="Metabolite_3"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_322">
-              <SourceParameter reference="Parameter_5034"/>
+              <SourceParameter reference="Parameter_6211"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_321">
               <SourceParameter reference="Metabolite_1"/>
@@ -736,17 +729,19 @@
               <SourceParameter reference="ModelValue_1"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_319">
-              <SourceParameter reference="Parameter_5021"/>
+              <SourceParameter reference="Parameter_6200"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_318">
-              <SourceParameter reference="Parameter_5024"/>
+              <SourceParameter reference="Parameter_6201"/>
             </CallParameter>
           </ListOfCallParameters>
         </KineticLaw>
       </Reaction>
       <Reaction key="Reaction_5" name="R6" reversible="false" fast="false" addNoise="false">
         <MiriamAnnotation>
-<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:RDF
+   xmlns:dcterms="http://purl.org/dc/terms/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <rdf:Description rdf:about="#Reaction_5">
     <dcterms:created>
       <rdf:Description>
@@ -755,17 +750,18 @@
     </dcterms:created>
   </rdf:Description>
 </rdf:RDF>
+
         </MiriamAnnotation>
         <ListOfSubstrates>
           <Substrate metabolite="Metabolite_1" stoichiometry="1"/>
         </ListOfSubstrates>
         <ListOfConstants>
-          <Constant key="Parameter_5040" name="k_mu2" value="0.05"/>
+          <Constant key="Parameter_6228" name="k_mu2" value="0.0475"/>
         </ListOfConstants>
         <KineticLaw function="Function_40" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
             <CallParameter functionParameter="FunctionParameter_264">
-              <SourceParameter reference="Parameter_5040"/>
+              <SourceParameter reference="Parameter_6228"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_263">
               <SourceParameter reference="Metabolite_1"/>
@@ -792,43 +788,43 @@
           <Modifier metabolite="Metabolite_0" stoichiometry="1"/>
         </ListOfModifiers>
         <ListOfConstants>
-          <Constant key="Parameter_5041" name="g_mZ" value="11"/>
-          <Constant key="Parameter_5035" name="l_1" value="7.5"/>
-          <Constant key="Parameter_5020" name="Z0_1" value="25000"/>
-          <Constant key="Parameter_5028" name="n_1" value="2"/>
-          <Constant key="Parameter_5037" name="l_3" value="10"/>
-          <Constant key="Parameter_5022" name="S" value="180000"/>
-          <Constant key="Parameter_5036" name="S0_3" value="180000"/>
-          <Constant key="Parameter_5027" name="n_3" value="2"/>
+          <Constant key="Parameter_6229" name="g_mZ" value="11"/>
+          <Constant key="Parameter_6212" name="l_1" value="7.5"/>
+          <Constant key="Parameter_6197" name="Z0_1" value="25000"/>
+          <Constant key="Parameter_6204" name="n_1" value="2"/>
+          <Constant key="Parameter_6213" name="l_3" value="10"/>
+          <Constant key="Parameter_6198" name="S" value="180000"/>
+          <Constant key="Parameter_6215" name="S0_3" value="180000"/>
+          <Constant key="Parameter_6203" name="n_3" value="2"/>
         </ListOfConstants>
         <KineticLaw function="Function_47" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
             <CallParameter functionParameter="FunctionParameter_314">
-              <SourceParameter reference="Parameter_5041"/>
+              <SourceParameter reference="Parameter_6229"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_313">
-              <SourceParameter reference="Parameter_5035"/>
+              <SourceParameter reference="Parameter_6212"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_312">
               <SourceParameter reference="Metabolite_0"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_311">
-              <SourceParameter reference="Parameter_5020"/>
+              <SourceParameter reference="Parameter_6197"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_310">
-              <SourceParameter reference="Parameter_5028"/>
+              <SourceParameter reference="Parameter_6204"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_309">
-              <SourceParameter reference="Parameter_5037"/>
+              <SourceParameter reference="Parameter_6213"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_308">
               <SourceParameter reference="ModelValue_0"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_307">
-              <SourceParameter reference="Parameter_5036"/>
+              <SourceParameter reference="Parameter_6215"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_306">
-              <SourceParameter reference="Parameter_5027"/>
+              <SourceParameter reference="Parameter_6203"/>
             </CallParameter>
           </ListOfCallParameters>
         </KineticLaw>
@@ -852,19 +848,19 @@
           <Modifier metabolite="Metabolite_1" stoichiometry="1"/>
         </ListOfModifiers>
         <ListOfConstants>
-          <Constant key="Parameter_5031" name="j_mZ_1" value="0"/>
-          <Constant key="Parameter_5026" name="j_mZ_2" value="0.04"/>
-          <Constant key="Parameter_5030" name="j_mZ_3" value="0.2"/>
-          <Constant key="Parameter_5029" name="mu2_0" value="10000"/>
-          <Constant key="Parameter_5032" name="j_mZ_4" value="1"/>
-          <Constant key="Parameter_5039" name="j_mZ_5" value="1"/>
-          <Constant key="Parameter_5023" name="j_mZ_6" value="1"/>
-          <Constant key="Parameter_5025" name="j_mZ_7" value="1"/>
+          <Constant key="Parameter_6210" name="j_mZ_1" value="0"/>
+          <Constant key="Parameter_6205" name="j_mZ_2" value="0.04"/>
+          <Constant key="Parameter_6207" name="j_mZ_3" value="0.2"/>
+          <Constant key="Parameter_6206" name="mu2_0" value="10000"/>
+          <Constant key="Parameter_6208" name="j_mZ_4" value="1"/>
+          <Constant key="Parameter_6230" name="j_mZ_5" value="1"/>
+          <Constant key="Parameter_6199" name="j_mZ_6" value="1"/>
+          <Constant key="Parameter_6202" name="j_mZ_7" value="1"/>
         </ListOfConstants>
         <KineticLaw function="Function_43" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
             <CallParameter functionParameter="FunctionParameter_292">
-              <SourceParameter reference="Parameter_5031"/>
+              <SourceParameter reference="Parameter_6210"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_291">
               <SourceParameter reference="Metabolite_1"/>
@@ -873,22 +869,22 @@
               <SourceParameter reference="ModelValue_1"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_289">
-              <SourceParameter reference="Parameter_5026"/>
+              <SourceParameter reference="Parameter_6205"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_288">
-              <SourceParameter reference="Parameter_5030"/>
+              <SourceParameter reference="Parameter_6207"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_287">
-              <SourceParameter reference="Parameter_5032"/>
+              <SourceParameter reference="Parameter_6208"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_286">
-              <SourceParameter reference="Parameter_5039"/>
+              <SourceParameter reference="Parameter_6230"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_285">
-              <SourceParameter reference="Parameter_5023"/>
+              <SourceParameter reference="Parameter_6199"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_284">
-              <SourceParameter reference="Parameter_5025"/>
+              <SourceParameter reference="Parameter_6202"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_273">
               <SourceParameter reference="Metabolite_2"/>
@@ -912,12 +908,12 @@
           <Substrate metabolite="Metabolite_2" stoichiometry="1"/>
         </ListOfSubstrates>
         <ListOfConstants>
-          <Constant key="Parameter_5042" name="k_mZ" value="0.5"/>
+          <Constant key="Parameter_6226" name="k_mZ" value="0.5"/>
         </ListOfConstants>
         <KineticLaw function="Function_45" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
             <CallParameter functionParameter="FunctionParameter_299">
-              <SourceParameter reference="Parameter_5042"/>
+              <SourceParameter reference="Parameter_6226"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_300">
               <SourceParameter reference="Metabolite_2"/>
@@ -927,9 +923,7 @@
       </Reaction>
       <Reaction key="Reaction_9" name="R14" reversible="false" fast="false" addNoise="false">
         <MiriamAnnotation>
-<rdf:RDF
-   xmlns:dcterms="http://purl.org/dc/terms/"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <rdf:Description rdf:about="#Reaction_9">
     <dcterms:created>
       <rdf:Description>
@@ -938,34 +932,33 @@
     </dcterms:created>
   </rdf:Description>
 </rdf:RDF>
-
         </MiriamAnnotation>
         <ListOfProducts>
           <Product metabolite="Metabolite_3" stoichiometry="1"/>
         </ListOfProducts>
         <ListOfConstants>
-          <Constant key="Parameter_5043" name="gmP" value="30"/>
-          <Constant key="Parameter_5044" name="lamF" value="10"/>
-          <Constant key="Parameter_5050" name="F" value="1000"/>
-          <Constant key="Parameter_5049" name="F0" value="100000"/>
-          <Constant key="Parameter_5051" name="nF" value="3"/>
+          <Constant key="Parameter_6233" name="gmP" value="30"/>
+          <Constant key="Parameter_6231" name="lamF" value="10"/>
+          <Constant key="Parameter_6219" name="F" value="1000"/>
+          <Constant key="Parameter_6224" name="F0" value="100000"/>
+          <Constant key="Parameter_6221" name="nF" value="3"/>
         </ListOfConstants>
         <KineticLaw function="Function_53" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
             <CallParameter functionParameter="FunctionParameter_335">
-              <SourceParameter reference="Parameter_5043"/>
+              <SourceParameter reference="Parameter_6233"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_336">
-              <SourceParameter reference="Parameter_5044"/>
+              <SourceParameter reference="Parameter_6231"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_334">
               <SourceParameter reference="ModelValue_2"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_341">
-              <SourceParameter reference="Parameter_5049"/>
+              <SourceParameter reference="Parameter_6224"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_342">
-              <SourceParameter reference="Parameter_5051"/>
+              <SourceParameter reference="Parameter_6221"/>
             </CallParameter>
           </ListOfCallParameters>
         </KineticLaw>
@@ -989,15 +982,15 @@
           <Modifier metabolite="Metabolite_1" stoichiometry="1"/>
         </ListOfModifiers>
         <ListOfConstants>
-          <Constant key="Parameter_5048" name="lmP1" value="0"/>
-          <Constant key="Parameter_5047" name="mu2_0" value="10000"/>
-          <Constant key="Parameter_5046" name="lmP2" value="0.2"/>
-          <Constant key="Parameter_5045" name="lmP3" value="1"/>
+          <Constant key="Parameter_6225" name="lmP1" value="0"/>
+          <Constant key="Parameter_6232" name="mu2_0" value="10000"/>
+          <Constant key="Parameter_6222" name="lmP2" value="0.2"/>
+          <Constant key="Parameter_6227" name="lmP3" value="1"/>
         </ListOfConstants>
         <KineticLaw function="Function_49" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
             <CallParameter functionParameter="FunctionParameter_326">
-              <SourceParameter reference="Parameter_5048"/>
+              <SourceParameter reference="Parameter_6225"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_325">
               <SourceParameter reference="Metabolite_1"/>
@@ -1006,10 +999,10 @@
               <SourceParameter reference="ModelValue_1"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_315">
-              <SourceParameter reference="Parameter_5046"/>
+              <SourceParameter reference="Parameter_6222"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_316">
-              <SourceParameter reference="Parameter_5045"/>
+              <SourceParameter reference="Parameter_6227"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_317">
               <SourceParameter reference="Metabolite_3"/>
@@ -1033,12 +1026,12 @@
           <Substrate metabolite="Metabolite_3" stoichiometry="1"/>
         </ListOfSubstrates>
         <ListOfConstants>
-          <Constant key="Parameter_5052" name="kmP" value="0.5"/>
+          <Constant key="Parameter_6223" name="kmP" value="0.5"/>
         </ListOfConstants>
         <KineticLaw function="Function_51" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
             <CallParameter functionParameter="FunctionParameter_340">
-              <SourceParameter reference="Parameter_5052"/>
+              <SourceParameter reference="Parameter_6223"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_339">
               <SourceParameter reference="Metabolite_3"/>
@@ -1066,22 +1059,22 @@
           <Modifier metabolite="Metabolite_1" stoichiometry="1"/>
         </ListOfModifiers>
         <ListOfConstants>
-          <Constant key="Parameter_5056" name="gP" value="100"/>
-          <Constant key="Parameter_5054" name="ltP1" value="1"/>
-          <Constant key="Parameter_5053" name="mu2_0" value="10000"/>
-          <Constant key="Parameter_5057" name="ltP2" value="0.3"/>
-          <Constant key="Parameter_5055" name="ltP3" value="0.05"/>
+          <Constant key="Parameter_6220" name="gP" value="100"/>
+          <Constant key="Parameter_6216" name="ltP1" value="1"/>
+          <Constant key="Parameter_6214" name="mu2_0" value="10000"/>
+          <Constant key="Parameter_6218" name="ltP2" value="0.3"/>
+          <Constant key="Parameter_6217" name="ltP3" value="0.05"/>
         </ListOfConstants>
         <KineticLaw function="Function_50" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
             <CallParameter functionParameter="FunctionParameter_332">
-              <SourceParameter reference="Parameter_5056"/>
+              <SourceParameter reference="Parameter_6220"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_331">
               <SourceParameter reference="Metabolite_3"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_330">
-              <SourceParameter reference="Parameter_5054"/>
+              <SourceParameter reference="Parameter_6216"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_329">
               <SourceParameter reference="Metabolite_1"/>
@@ -1090,10 +1083,10 @@
               <SourceParameter reference="ModelValue_1"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_327">
-              <SourceParameter reference="Parameter_5057"/>
+              <SourceParameter reference="Parameter_6218"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_333">
-              <SourceParameter reference="Parameter_5055"/>
+              <SourceParameter reference="Parameter_6217"/>
             </CallParameter>
           </ListOfCallParameters>
         </KineticLaw>
@@ -1114,12 +1107,12 @@
           <Substrate metabolite="Metabolite_4" stoichiometry="1"/>
         </ListOfSubstrates>
         <ListOfConstants>
-          <Constant key="Parameter_5059" name="kPM" value="0.15"/>
+          <Constant key="Parameter_6235" name="kPM" value="0.15"/>
         </ListOfConstants>
         <KineticLaw function="Function_52" unitType="Default" scalingCompartment="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Compartments[Tumor cell]">
           <ListOfCallParameters>
             <CallParameter functionParameter="FunctionParameter_337">
-              <SourceParameter reference="Parameter_5059"/>
+              <SourceParameter reference="Parameter_6235"/>
             </CallParameter>
             <CallParameter functionParameter="FunctionParameter_338">
               <SourceParameter reference="Metabolite_4"/>
@@ -1214,7 +1207,7 @@ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
             <ModelParameter cn="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Reactions[R5],ParameterGroup=Parameters,Parameter=lmumP3" value="1" type="ReactionParameter" simulationType="fixed"/>
           </ModelParameterGroup>
           <ModelParameterGroup cn="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Reactions[R6]" type="Reaction">
-            <ModelParameter cn="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Reactions[R6],ParameterGroup=Parameters,Parameter=k_mu2" value="0.050000000000000003" type="ReactionParameter" simulationType="fixed"/>
+            <ModelParameter cn="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Reactions[R6],ParameterGroup=Parameters,Parameter=k_mu2" value="0.047500000000000001" type="ReactionParameter" simulationType="fixed"/>
           </ModelParameterGroup>
           <ModelParameterGroup cn="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Reactions[R7]" type="Reaction">
             <ModelParameter cn="CN=Root,Model=Initial model crosstalk between EMT and PD-L1,Vector=Reactions[R7],ParameterGroup=Parameters,Parameter=g_mZ" value="11" type="ReactionParameter" simulationType="fixed"/>
