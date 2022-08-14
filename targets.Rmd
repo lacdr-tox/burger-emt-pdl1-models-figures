@@ -18,7 +18,7 @@ options(scipen=999)
 install.packages("remotes")
 remotes::install_github("ropensci/targets")
 remotes::install_github("clauswilke/colorblindr")
-remotes::install_cran(c("drc", "colorspace", "grid", "cowplot", "magick", "targets", "tarchetypes", "scales", "glue", "colorblindr", "fs", "rootSolve", 'tidyverse'))
+remotes::install_cran(c("drc", "colorspace", "grid", "cowplot", "magick", "targets", "tarchetypes", "scales", "glue", "colorblindr", "fs", "rootSolve", 'tidyverse','interp'))
                       
 source("R/functions.R")
 source("R/common_plotstuff.R")
@@ -55,7 +55,7 @@ options(tidyverse.quiet = TRUE)
 options(scipen=999)
 source("R/functions.R")
 source("R/common_plotstuff.R")
-tar_option_set(packages = c("drc", "cowplot", "magick", "grid",  "colorspace", "tarchetypes", "scales", "glue", "magrittr", "colorblindr", "fs", "rootSolve", "tidyverse"))
+tar_option_set(packages = c("drc", "cowplot", "magick", "grid",  "colorspace", "tarchetypes", "scales", "glue", "magrittr", "colorblindr", "fs", "rootSolve", "tidyverse", "interp"))
 library(tarchetypes)
 
 text_size <- 15
@@ -378,41 +378,102 @@ g_I_cont_pd %>%
 ```
 #### 2D bif
 
-```{targets init_model_pd, tar_simple = T}
+```{targets fixed_bps_twod_copasi, tar_simple = T}
 twod_copasi %>% 
   drop_na() %>%
   nest_by(`Values[I (global)].InitialValue`) -> nested
 
+# Find bifurcations x and y points
 nested <- nested %>%
   mutate(
-    bps = list(determine_BP(data, "# Values[S].InitialValue", "[mZ]", res = "x"))
+    bpx = list(determine_BP(data, "# Values[S].InitialValue", "[mZ]", res = "x")),
+    bpy = list(determine_BP(data, "# Values[S].InitialValue", "[mZ]", res = "y")),
   )
 
-nested %>% 
-  filter(length(bps) <= 4) %>% # sometimes too many bps are detected
-  summarize(bp_to_tibble(bps), .groups = "drop") %>%
-  rename(IFN = `Values[I (global)].InitialValue`) -> sum2
+# sometimes too many bps are detected
+wonky <- nested %>% filter(length(bpx) != 4)
 
+## Inspect the wonky bps
+# wonky %>% mutate(
+#   data = list(data %>% mutate(interval = findInterval(`[mZ]`, bpy)))
+# ) %>% 
+#   select(-bpx, -bpy) %>%
+#   unnest(data) %>% 
+#   ggplot(aes(`# Values[S].InitialValue`,`[mZ]`, color = as.factor(interval))) + 
+#            geom_point() +
+#            facet_wrap(vars(`Values[I (global)].InitialValue`))
 
-BP1_sp <- spline(sum2$IFN, sum2$BP1, xmax = 0.1, n = 10*length(sum2$IFN))
-BP2_sp <- spline(sum2$IFN, sum2$BP2, xmax = 0.1, n = 10*length(sum2$IFN))
-BP3_sp <- spline(sum2$IFN, sum2$BP3, xmax = 0.1, n = 10*length(sum2$IFN))
-BP4_sp <- spline(sum2$IFN, sum2$BP4, xmax = 0.1, n = 10*length(sum2$IFN))
+correct_bps <- tibble(
+  `Values[I (global)].InitialValue` = wonky$`Values[I (global)].InitialValue`,
+  bps = list(
+    c(1:4),
+    c(1,2,5,6),
+    c(1:4),
+    c(1,2,3,6),
+    c(1,2,3,6),
+    c(1,2,5,6),
+    c(1,2,3,6),
+    c(1,2,3,6),
+    c(1,2,3,6),
+    c(1,2,5,6)
+  )
+)
+  
+fixed <- wonky %>% 
+  left_join(correct_bps) %>%
+  rowwise() %>%
+  mutate(
+    bpx = list(bpx[bps]),
+    bpy = list(bpy[bps])
+  ) %>%
+  select(-bps)
+
+## check fixed bps
+# fixed %>% mutate(
+#   data = list(data %>% mutate(interval = findInterval(`[mZ]`, bpy)))
+# ) %>% 
+#   select(-bpx, -bpy) %>%
+#   unnest(data) %>% 
+#   ggplot(aes(`# Values[S].InitialValue`,`[mZ]`, color = as.factor(interval))) + 
+#   geom_point() +
+#   facet_wrap(vars(`Values[I (global)].InitialValue`))
+
+nested %>%
+  rows_update(fixed)
+```
+
+```{targets twod_copasi_bps_res}
+list(
+  tar_target(twod_bps_raw, {
+    fixed_bps_twod_copasi %>% 
+      summarize(bp_to_tibble(bpx), .groups = "drop") %>%
+      rename(IFN = `Values[I (global)].InitialValue`)
+  }),
+  tar_target(twod_bps_smooth, {
+    BP1_sp <- spline(twod_bps_raw$IFN, twod_bps_raw$BP1, xmax = 0.1, n = 10*length(twod_bps_raw$IFN))
+    BP2_sp <- spline(twod_bps_raw$IFN, twod_bps_raw$BP2, xmax = 0.1, n = 10*length(twod_bps_raw$IFN))
+    BP3_sp <- spline(twod_bps_raw$IFN, twod_bps_raw$BP3, xmax = 0.1, n = 10*length(twod_bps_raw$IFN))
+    BP4_sp <- spline(twod_bps_raw$IFN, twod_bps_raw$BP4, xmax = 0.1, n = 10*length(twod_bps_raw$IFN))
 BP_smooth <- tibble(IFN = BP1_sp$x, BP1 = BP1_sp$y, BP2 = BP2_sp$y, BP3 = BP3_sp$y, BP4 = BP4_sp$y)
+  })
+)
+```
 
-ggplot(BP_smooth) +
+
+
+```{targets init_model_pd, tar_simple = T}
+ggplot(twod_bps_smooth) +
   geom_ribbon(aes(y = IFN, xmin = xmin, xmax = xmax, fill = '{E}')) +
   geom_ribbon(aes(y = IFN, xmin = BP4 / 1e5, xmax = xmax, fill = '{E, M}')) +
   geom_ribbon(aes(y = IFN, xmin = BP2 / 1e5, xmax = xmax, fill = '{E, E/M, M}')) +
   geom_ribbon(aes(y = IFN, xmin = BP1 / 1e5, xmax = xmax, fill = '{E/M, M}')) +
   geom_ribbon(aes(y = IFN, xmin = BP3 / 1e5, xmax = xmax, fill = '{M}')) +
   geom_vline(xintercept = 190000 / 1e5, linetype = "dashed") +
-  coord_cartesian(ylim = c(0,0.1)) +
+  coord_cartesian(ylim = c(0,0.1), expand = F) +
   labs(x = bquote('SNAIL1 ('*10^5~'molecules)'), y = expression(paste('IFN', gamma, ' (nM)')), fill = NULL) +
   #scale_fill_manual(name = "", values = c('{E, E/M, M}' = custom.col[15], '{E, M}' = custom.col[4], '{E/M, M}' = custom.col[13], '{E}' = custom.col[6], '{M}' = custom.col[24]), limits = c('{E}', '{E, M}', '{E, E/M, M}', '{E/M, M}', '{M}')) +
   scale_fill_OkabeIto(order = 3:7, limits = c('{E}','{E, M}', '{E, E/M, M}', '{E/M, M}', '{M}')) + 
-  scale_x_continuous(expand = c(0,0)) +
-  scale_y_continuous(expand = c(0,0), breaks = seq(0, 0.1, by =0.02))  
+  scale_y_continuous(breaks = seq(0, 0.1, by =0.02))  
 ```
 
 #### Combined
@@ -465,7 +526,7 @@ time_dynamics <- tribble(
 
 time_dynamics <- time_dynamics %>%
   mutate(
-    across(all_of(c("[mP]", "[PM]")), ~ ifelse(experiment == "no_int", NA, .x)),
+    across(all_of(c("[mP]", "[PM]","(R5).Flux")), ~ ifelse(experiment == "no_int", NA, .x)),
     time = `# Time`/24
   ) %>% select(-`# Time`)
 
@@ -585,7 +646,125 @@ path <- "output/si_statpdl_model.pdf"
 ggsave(path, plot = si_statpdl_model, width = 8, height = 4, device = cairo_pdf)
 ```
 
-### S2. Simplified model
+### S2. PD-L1 for different EMT states
+
+Smooth and interpolate data to be able to use geom_raster
+
+```{targets interped_data, tar_simple = T}
+
+# Add EMT status to data based on BP interval
+fixed_bps_twod_copasi %>%
+  mutate(
+    data = list(data %>% mutate(interval = findInterval(`[mZ]`, bpy)))
+  ) %>%
+  select(-bpx,-bpy) %>%
+  unnest(data) %>%
+  filter((interval %% 2) == 0 ) %>%
+  left_join(tibble(interval = c(0,2,4), emt = c("E", "E/M", "M")), by = "interval") %>%
+  select(-interval) %>%
+  rename(
+    IFN = `Values[I (global)].InitialValue`,
+    S = `# Values[S].InitialValue`
+    ) -> sumtest
+
+# take average for duplicates
+sumtest %>% 
+  select(IFN, S, emt, `[PM]`) %>%
+  group_by(IFN, S, emt) %>% 
+  summarise(across(where(is.numeric), mean), .groups = "drop") -> simple_sum
+
+# reduce x resolution to solve missing values and make suitable for interp
+xintervals <- with(simple_sum, seq(min(S), max(S), length = 101))
+xmidinterval <- xintervals + diff(xintervals)[1]
+simple_sum %>% 
+  ungroup() %>% 
+  mutate(s_bin = findInterval(S, xintervals)) %>% 
+  group_by(IFN, s_bin, emt) %>% 
+  summarize(`[PM]` = mean(`[PM]`), .groups = "drop") %>%
+  left_join(tibble(s_bin = seq_along(xintervals), s_bin_mid = xmidinterval), by = "s_bin") %>%
+  mutate(S = s_bin_mid) %>%
+  select(-starts_with("s_bin")) -> simple_sum2
+
+simple_sum2 %>% 
+  nest_by(emt) %>%
+  mutate(
+    data = list({
+        interp(data$S / 1e5, data$IFN, data$`[PM]`, 
+               xo = xmidinterval / 1e5, yo = unique(data$IFN)) %>% 
+        interp2xyz(data.frame = T) %>% 
+        rename(S = x, IFN = y, `[PM]` = z) %>%
+        as_tibble() %>% 
+        drop_na()
+    }))-> interped_data_full
+
+bounds <- tibble(
+  emt = c("E", "E/M", "M"), 
+  bounds = list(
+    twod_bps_raw %>% select(IFN, s_max = BP1) %>% add_column(s_min = 0),
+    twod_bps_raw %>% select(IFN, s_min = BP2, s_max = BP3),
+    twod_bps_raw %>% select(IFN, s_min = BP4) %>% add_column(s_max = Inf)
+  )
+)
+
+# remove interpolation outside hull
+interped_data_full %>% 
+  left_join(bounds, by = "emt") %>% 
+  mutate(
+    data= list(data %>% 
+                 left_join(bounds, by = "IFN") %>%
+                 filter(S >= s_min / 1e5, S <= s_max / 1e5) %>%
+                 select(-s_min, -s_max)
+    )
+    ) %>% 
+  select(-bounds) %>%
+  unnest(data)
+```
+
+```{targets si_pdl_emt_plot_data, tar_simple = T}
+interped_data %>%
+  group_by(IFN, S) %>%
+  summarize(`[PM]` = mean(`[PM]`, na.rm =T), .groups = "drop") -> averaged
+
+bind_rows(interped_data, averaged %>% add_column(emt = "Average")) %>%
+  mutate(emt = factor(emt, levels = c("E", "E/M", "M", "Average")))
+```
+```{targets si_pdl_emt_plot, tar_simple=T}
+si_pdl_emt_plot_data %>%
+  ggplot(aes(S,IFN)) + 
+  geom_raster(aes(fill = `[PM]` / 1e5)) + 
+  facet_wrap(vars(emt), nrow = 1) +
+  scale_fill_viridis_c(limits = function(x) {x[1] <- 0; x}) +
+  labs(x = bquote('SNAIL1 ('*10^5~'molecules)'),
+       y = expression(paste('IFN', gamma, ' (nM)')),
+       fill = bquote('PD-L1 membrane ('*10^5~'molecules)')) + 
+  geom_path(data = twod_bps_smooth %>% pivot_longer(cols = starts_with("BP")), 
+            aes(x = value / 1e5, y = IFN, group = name), 
+            inherit.aes = F, size = 1, color = "white") +
+  coord_cartesian(expand = F) + 
+  scale_y_continuous(breaks = seq(0, 0.1, by =0.02)) +  
+  theme_cowplot(text_size) + 
+  panel_border() +
+  theme(strip.background = element_blank()) + 
+  theme(legend.position="top", 
+        legend.justification = "right") 
+```
+
+
+
+#### Combined
+
+```{targets si_pdl_emt_output}
+list(
+  tar_target(si_pdl_emt_file, {
+    path <- "output/si_pdl_emt.pdf"
+    ggsave(path, plot = si_pdl_emt_plot, width = 12, height = 4, device = cairo_pdf)
+  })
+)
+```
+
+
+
+### S3. Simplified model
 
 ```{targets si_simplified}
 list(
@@ -649,7 +828,7 @@ list(
 )
 ```
 
-### S3. Sensitivity
+### S4. Sensitivity
 
 ```{targets sens_files}
 list(
@@ -879,7 +1058,53 @@ list(
   })
 )
 ```
-### S4. Alt temp dynamics
+
+### S5. mP * Y dynamics
+
+```{targets si_td_mPY, tar_simple = T}
+td_vars <- c("(R5).Flux")
+td_labels <- c("mP * Y") %>% setNames(td_vars)
+
+time_dynamics_long %>% 
+  filter(name %in% td_vars) %>%
+  mutate(experiment = factor(experiment, levels = exp_order)) %>%
+  ggplot(aes(time,value * 1e10, color = experiment)) +
+  geom_line(aes(linetype = experiment), size = 1.2) +
+  facet_grid(rows = vars(factor(name, levels = td_vars)), cols = vars(type), 
+             scales = "free_y", switch = "y",
+             labeller = labeller(.rows = as_labeller(td_labels))) +
+  #facet_wrap(vars(type), labeller = labeller(as_labeller(td_labels))) +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = expansion(mult = c(0,0.05))) +
+  expand_limits(y = 0) + 
+  #scale_color_OkabeIto(order = c(8,2,1), labels = exp_labels, name = NULL) +
+  #scale_linetype_manual(values = c("dashed", "solid", "solid"), labels = exp_labels, name = NULL) + 
+  scale_color_OkabeIto(order = c(8,2,1), labels = exp_labels, name = NULL) +
+  scale_linetype_manual(values = c("dashed", "solid", "solid"), labels = exp_labels, name = NULL) + 
+  labs(x = "Time (days)", y = bquote('Flux (' * 10^-10 ~ 'molecules/time)')) + 
+  theme_cowplot(text_size) + 
+  panel_border() +
+  #background_grid() + 
+  theme(strip.placement = 'outside', 
+        strip.background = element_blank(),
+        strip.text.x = element_text(size = 1.2*text_size, face = "bold"),
+        panel.spacing.x = unit(1, "lines"),
+        legend.position = "top",
+        legend.justification = "right")
+```
+
+#### Combined
+
+```{targets si_td_mPY_file}
+  tar_target(si_td_mPY_file, {
+    path <- "output/si_temp_dyn_mPY.pdf"
+    ggsave(path, plot = si_td_mPY, width = 12, height = 3.5, device = cairo_pdf)
+  })
+```
+
+
+
+### S6. Alt temp dynamics
 
 ```{targets temp_dyn_alt_files}
 list(
@@ -938,6 +1163,7 @@ time_dynamics_alt_long %>%
         legend.position = "top",
         legend.justification = "right")
 ```
+
 #### Combined
 
 ```{targets fig3_alt}
@@ -947,7 +1173,7 @@ time_dynamics_alt_long %>%
   })
 ```
 
-### S5. Jak-Stat steady state
+### S7. Jak-Stat steady state
 
 ```{targets jakstat-ss}
 list(
