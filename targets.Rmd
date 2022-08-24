@@ -539,7 +539,7 @@ list(
                         "[mF]", "[F]")),
   tar_target(td_labels, c(
     "miR-200",
-    "ZEB1 mRNA ",
+    "ZEB1 mRNA",
     "ZEB1",
     "PD-L1 mRNA",
     "PD-L1 ER",
