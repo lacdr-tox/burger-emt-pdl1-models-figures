@@ -231,16 +231,17 @@ list(
                 nrow = 1, rel_widths = c(1.1,2),
                 labels = c("A", "B"), label_size = label_size),
       NULL, NULL,
-      tc_combined,
+      plot_grid(tc_aligned[[1]], NULL, tc_aligned[[2]], tc_aligned[[3]], 
+                nrow = 1, rel_widths = c(1,0.05,1,1),
+                labels = c("C", "D","", "F"), label_size = label_size),
       plot_grid(NULL,
                 tc_ss_alt_plot,
                 NULL,
                 tc_plot,
                 NULL,
                 nrow = 1, align = "h", rel_widths = c(0.05, 1,0.05,1,1),
-                labels = c("D","", "", "", ""), label_size = label_size),
-      ncol = 1, rel_heights = c(2.5, 0.05, 0.1, 1,1.7),
-      labels = c("", "", "C", ""), label_size = label_size
+                labels = c("E","", "", "", ""), label_size = label_size),
+      ncol = 1, rel_heights = c(2.5, 0.05, 0.1, 1,1.7)
     )
   }),
   tar_target(figure1_file, {
