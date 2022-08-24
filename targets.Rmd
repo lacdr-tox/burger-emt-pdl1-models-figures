@@ -501,12 +501,12 @@ list(
 ```{targets temp_dyn_files}
 emt_td_path <- "data/emt_td"
 list(
-  tar_target(emt_no_int_file, path(emt_td_path, "EMT no interaction.txt"), format = "file"),
-  tar_target(emt_ifn0_file, path(emt_td_path, "EMT no IFN fixed.txt"), format = "file"),
-  tar_target(emt_ifn1_file, path(emt_td_path, "EMT IFN fixed.txt"), format = "file"),
-  tar_target(met_no_int_file, path(emt_td_path, "MET no interaction.txt"), format = "file"),
-  tar_target(met_ifn0_file, path(emt_td_path, "MET no IFN fixed.txt"), format = "file"),
-  tar_target(met_ifn1_file, path(emt_td_path, "MET IFN fixed.txt"), format = "file")
+  tar_target(emt_no_int_file, path(emt_td_path, "EMT no interaction fluxes.txt"), format = "file"),
+  tar_target(emt_ifn0_file, path(emt_td_path, "EMT no IFN fluxes.txt"), format = "file"),
+  tar_target(emt_ifn1_file, path(emt_td_path, "EMT IFN fluxes.txt"), format = "file"),
+  tar_target(met_no_int_file, path(emt_td_path, "MET no interaction fluxes.txt"), format = "file"),
+  tar_target(met_ifn0_file, path(emt_td_path, "MET no IFN fluxes.txt"), format = "file"),
+  tar_target(met_ifn1_file, path(emt_td_path, "MET IFN fluxes.txt"), format = "file")
 )
 ```
 ```{targets time_dynamics_long, tar_simple = T}
@@ -1062,18 +1062,38 @@ list(
 ### S5. mP * Y dynamics
 
 ```{targets si_td_mPY, tar_simple = T}
-td_vars <- c("(R5).Flux")
-td_labels <- c("mP * Y") %>% setNames(td_vars)
+td_vars <- c(
+  "(R3).Flux",
+  "(R4).Flux",
+  "(R5).Flux",
+  "(R6).Flux"
+  )
 
-time_dynamics_long %>% 
+time_dynamics_long %>%
   filter(name %in% td_vars) %>%
+  pivot_wider(id_cols = c(type, experiment, time)) %>%
+  mutate(across(c("(R4).Flux", "(R5).Flux", "(R6).Flux"), ~ -.x)) %>%
+  mutate(Total = `(R3).Flux` + `(R4).Flux` + ifelse(!is.na(`(R5).Flux`), `(R5).Flux`, 0) + `(R6).Flux`) %>% 
+  pivot_longer(cols = c(-type, -experiment, -time)) -> time_dynamics_long_flux
+
+td_vars <- c("Total", td_vars)
+td_labels <- c(
+  expression(paste("d", mu, "/dt")),
+  expression(paste("g"[mu],"H"[Z],"H"[S])),
+  expression(paste(-"m"[Z],Y)),
+  expression(paste(-"m"[P],Y)),
+  expression(paste(-"k"[mu],mu))
+  ) %>% setNames(td_vars)
+
+time_dynamics_long_flux %>% 
+  filter(name %in% td_vars) %>%
+  mutate(name = factor(name, levels = td_vars, labels = td_labels)) %>%
   mutate(experiment = factor(experiment, levels = exp_order)) %>%
   ggplot(aes(time,value * 1e10, color = experiment)) +
   geom_line(aes(linetype = experiment), size = 1.2) +
-  facet_grid(rows = vars(factor(name, levels = td_vars)), cols = vars(type), 
+  facet_grid(rows = vars(name), cols = vars(type), 
              scales = "free_y", switch = "y",
-             labeller = labeller(.rows = as_labeller(td_labels))) +
-  #facet_wrap(vars(type), labeller = labeller(as_labeller(td_labels))) +
+             labeller = labeller(.rows = label_parsed)) +
   scale_x_continuous(expand = c(0,0)) +
   scale_y_continuous(expand = expansion(mult = c(0,0.05))) +
   expand_limits(y = 0) + 
@@ -1097,8 +1117,8 @@ time_dynamics_long %>%
 
 ```{targets si_td_mPY_file}
   tar_target(si_td_mPY_file, {
-    path <- "output/si_temp_dyn_mPY.pdf"
-    ggsave(path, plot = si_td_mPY, width = 12, height = 3.5, device = cairo_pdf)
+    path <- "output/si_temp_dyn_fluxes.pdf"
+    ggsave(path, plot = si_td_mPY, width = 12, height = 10, device = cairo_pdf)
   })
 ```
 
