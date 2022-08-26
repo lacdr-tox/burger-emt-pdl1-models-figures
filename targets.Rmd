@@ -1123,9 +1123,9 @@ time_dynamics_long_flux %>%
 ```
 ```{targets si_td_flux_mPY, tar_simple = T}
 time_dynamics_long_flux %>% 
-  filter(name == "(R5).Flux") %>%
+  filter(name == "(R5).Flux", experiment != "no_int") %>%
   mutate(name = factor(name, levels = flux_td_vars, labels = flux_td_labels)) %>%
-  mutate(experiment = factor(experiment, levels = exp_order)) %>%
+  mutate(experiment = factor(experiment, levels = exp_order[-1])) %>%
   ggplot(aes(time,value * 1e10, color = experiment)) +
   geom_line(aes(linetype = experiment), size = 1.2) +
   facet_grid(rows = vars(name), cols = vars(type), 
@@ -1134,8 +1134,8 @@ time_dynamics_long_flux %>%
   scale_x_continuous(expand = c(0,0)) +
   scale_y_continuous(expand = expansion(mult = c(0,0.05))) +
   expand_limits(y = 0) + 
-  scale_color_OkabeIto(order = c(8,2,1), labels = exp_labels, name = NULL) +
-  scale_linetype_manual(values = c("dashed", "solid", "solid"), labels = exp_labels, name = NULL) + 
+  scale_color_OkabeIto(order = c(2,1), labels = exp_labels[-1], name = NULL) +
+  scale_linetype_manual(values = c("solid", "solid"), labels = exp_labels[-1], name = NULL) + 
   labs(x = "Time (days)", y = bquote('Flux (' * 10^-10 ~ 'molecules/time)')) + 
   theme_cowplot(text_size) + 
   panel_border() +
@@ -1320,15 +1320,18 @@ sens_xmin <- 180000 / 1e5
 sens_xmax <- (230000+1) / 1e5
 
 kmu_sens_plot_data %>%
+  group_by(k_mu2) %>%
+  arrange(`[Z]`) %>%
+  add_column(model = "Combined") %>%
   left_join(meta, by = "k_mu2") %>%
-  ggplot(aes(`# Values[S].InitialValue` / 1e5, `[Z]`, linetype = stable, 
-             color = as.factor(change), group = interaction(interval, k_mu2)))+ 
-  geom_line(size = 0.5) +
-  scale_linetype_discrete(guide = "none", limits = c(T,F)) +
+  ggplot(aes(`# Values[S].InitialValue` / 1e5, `[Z]`, linetype = model, 
+             color = as.factor(change), group = k_mu2))+ 
+  geom_path(size = 1) +
   scale_color_discrete_diverging(palette = "Blue-Red", n= 9) +
   labs(color = expression("k"[mu]),
        x = bquote('SNAIL1 ('*10^5~'molecules)'), 
-       y = 'ZEB1 (molecules)'
+       y = 'ZEB1 (molecules)',
+       linetype = "Model"
   ) +
   #guides(color = guide_legend(nrow = 1)) +
   theme_cowplot(font_size = text_size) +
@@ -1349,10 +1352,10 @@ pp
 # Get base TCS line
 bifs_snail_data %>% 
   filter(experiment == "no_int") %>%
-  add_column(k_mu2 = as.factor(0.05)) -> tcs_bif
+  add_column(k_mu2 = as.factor(0.05), model = "TCS") -> tcs_bif
 
 pp +
-  geom_line(data = tcs_bif, color = "black", size = 1)
+  geom_path(data = tcs_bif %>% arrange(`[Z]`), color = "black", size = 1)
 
 ```
 
@@ -1362,7 +1365,7 @@ pp +
 list(
   tar_target(si_kmu_sens_file, {
     path <- "output/si_kmu_sens.pdf"
-    ggsave(path, plot = kmu_sens_plot, width = 10, height = 5)
+    ggsave(path, plot = kmu_sens_plot, width = 9, height = 5)
   })
 )
 ```
