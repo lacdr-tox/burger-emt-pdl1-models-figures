@@ -13,7 +13,7 @@ options(scipen=999)
 # Packages
 
 ```{r, eval = FALSE}
-# DON'T USE use renv::restore
+# DON'T USE THIS use renv::restore
 # also DESCRIPTION now handles dependencies for renv
 install.packages("remotes")
 remotes::install_github("ropensci/targets")
