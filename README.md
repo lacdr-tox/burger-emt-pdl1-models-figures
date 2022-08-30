@@ -4,6 +4,8 @@
 # burger-emt-pdl1-models-figures
 
 <!-- badges: start -->
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6000437.svg)](https://doi.org/10.5281/zenodo.6000437)
 <!-- badges: end -->
 
 Models and code to generate figures for “Bidirectional Crosstalk Between
@@ -35,8 +37,8 @@ Figures are generated reproducibly in R using
 
     to install R package dependencies.
 
-4.  Open `targets.Rmd` and choose *Run* > *Run All*. Figures will appear
-    in the `output` folder.
+4.  Open `targets.Rmd` and choose *Run* \> *Run All*. Figures will
+    appear in the `output` folder.
 
 ------------------------------------------------------------------------
 
