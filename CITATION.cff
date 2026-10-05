@@ -4,8 +4,7 @@
 cff-version: 1.2.0
 title: Burger et al. EMT PDL1 Supporting Models & Figures
 message: >-
-  If you use this software, please cite it using the
-  metadata from this file.
+  If you use this software, please cite both the article from preferred-citation and the software itself.
 type: software
 authors:
   - given-names: Gerhard Burger
