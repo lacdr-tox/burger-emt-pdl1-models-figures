@@ -8,10 +8,13 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6000437.svg)](https://doi.org/10.5281/zenodo.6000437)
 <!-- badges: end -->
 
-Models and code to generate figures for “Bidirectional Crosstalk Between
-Epithelial-Mesenchymal Plasticity and IFNγ-Induced PD-L1 Expression
-Promotes Tumor Progression.” bioRxiv.
-<https://doi.org/10.1101/2022.02.03.478950> (Burger et al. 2022).
+Models and code used to generate figures for
+
+> Burger, G. A., D. N. Nesenberend, C. M. Lems, et al. (2022).,
+> “Bidirectional crosstalk between epithelial–mesenchymal plasticity
+> and, IFNγ-induced PD-L1 expression promotes tumour progression”. In:
+> *Royal, Society Open Science* 9.11, p. 220186.,
+> <https://doi.org/10.1098/rsos.220186>.
 
 ## Usage
 
@@ -41,17 +44,3 @@ Figures are generated reproducibly in R using
     appear in the `output` folder.
 
 ------------------------------------------------------------------------
-
-<div id="refs" class="references csl-bib-body hanging-indent">
-
-<div id="ref-Burger2022_biorxiv" class="csl-entry">
-
-Burger, Gerhard A, Daphne N Nesenberend, Carlijn M Lems, Sander C Hille,
-and Joost B Beltman. 2022. “Bidirectional Crosstalk Between
-Epithelial-Mesenchymal Plasticity and IFNγ-Induced PD-L1 Expression
-Promotes Tumor Progression.” *bioRxiv*.
-<https://doi.org/10.1101/2022.02.03.478950>.
-
-</div>
-
-</div>

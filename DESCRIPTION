@@ -21,6 +21,7 @@ Imports:
 Suggests:
     rmarkdown,
     markdown,
-    knitr
+    knitr,
+    RefManageR
 Remotes: 
     clauswilke/colorblindr

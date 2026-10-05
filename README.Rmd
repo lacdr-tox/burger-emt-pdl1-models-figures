@@ -1,6 +1,5 @@
 ---
 output: github_document
-bibliography: bibliography.bib
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -10,6 +9,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+library(RefManageR)
+bib <- ReadBib("bibliography.bib", check = FALSE)
 ```
 
 # burger-emt-pdl1-models-figures
@@ -18,7 +19,11 @@ knitr::opts_chunk$set(
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6000437.svg)](https://doi.org/10.5281/zenodo.6000437)
 <!-- badges: end -->
 
-Models and code to generate figures for “Bidirectional Crosstalk Between Epithelial-Mesenchymal Plasticity and IFNγ-Induced PD-L1 Expression Promotes Tumor Progression.” bioRxiv. https://doi.org/10.1101/2022.02.03.478950 [@Burger2022_biorxiv].
+Models and code used to generate figures for
+
+> `r NoCite(bib, c("Burger2022_rsos")); 
+res <- capture.output(PrintBibliography(bib, .opts = list(style = "text", bib.style = "authoryear", no.print.fields = c("doi", "eprint", "issn", "isbn")))); gsub("(\\b[12][0-9]{3})NA\\b", "\\1", res)`
+
 
 ## Usage
 
@@ -34,10 +39,8 @@ Figures are generated reproducibly in R using [`renv`](https://rstudio.github.io
 2. Open the project file (`.Rproj`) in RStudio
 3. Run 
     ```{r, eval=F}
-renv::restore()
-```
+    renv::restore()
+    ```
     to install R package dependencies.
 
 4. Open `targets.Rmd` and choose *Run* > *Run All*. Figures will appear in the `output` folder.
-
----
