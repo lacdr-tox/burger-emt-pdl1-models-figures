@@ -1,0 +1,68 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Burger et al. EMT PDL1 Supporting Models & Figures
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Gerhard Burger
+    orcid: 'https://orcid.org/0000-0003-1062-5576'
+    email: burger.ga@gmail.com
+    affiliation: Leiden University
+  - given-names: Daphne
+    family-names: Nesenberend
+    affiliation: Leiden University
+    orcid: 'https://orcid.org/0000-0003-0732-8917'
+  - given-names: Carlijn
+    family-names: Lems
+    affiliation: Leiden University
+    orcid: 'https://orcid.org/0000-0002-0635-2870'
+  - given-names: Sander
+    family-names: Hille
+    affiliation: Leiden University
+    orcid: 'https://orcid.org/0000-0003-0437-6745'
+  - orcid: 'https://orcid.org/0000-0001-9215-3087'
+    given-names: Joost
+    family-names: Beltman
+    email: j.b.beltman@lacdr.leidenuniv.nl
+    affiliation: Leiden University
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.6000437
+    description: Concept DOI
+repository-code: >-
+  https://github.com/lacdr-tox/burger-emt-pdl1-models-figures
+abstract: >-
+  Models and code to generate figures for "Bidirectional
+  crosstalk between epithelial–mesenchymal plasticity and
+  IFNγ-induced PD-L1 expression promotes tumour
+  progression". R. Soc. Open Sci.
+  https://doi.org/10.1098/rsos.220186 (Burger et al., 2022)
+license: MIT
+preferred-citation:
+  type: article
+  title: "Bidirectional crosstalk between epithelial–mesenchymal plasticity and IFNγ-induced PD-L1 expression   promotes tumour progression"
+  authors:
+    - family-names: Burger
+      given-names: Gerhard A.
+      orcid: "https://orcid.org/0000-0003-1062-5576"
+    - family-names: Nesenberend
+      given-names: Daphne N.
+      orcid: "https://orcid.org/0000-0003-0732-8917"
+    - family-names: Lems
+      given-names: Carlijn M.
+      orcid: "https://orcid.org/0000-0002-0635-2870"
+    - family-names: Hille
+      given-names: Sander C.
+      orcid: "https://orcid.org/0000-0003-0437-6745"
+    - family-names: Beltman
+      given-names: Joost B.
+      orcid: "https://orcid.org/0000-0001-9215-3087"
+  doi: 10.1098/rsos.220186
+  journal: "Royal Society Open Science"
+  volume: 9
+  issue: 11
+  year: 2022
